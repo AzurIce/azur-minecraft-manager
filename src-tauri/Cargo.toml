@@ -1,8 +1,8 @@
 [package]
-name = "azur-minecraft-launcher"
+name = "azur-minecraft-manager"
 version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "A Minecraft Manager"
+authors = ["AzurIce"]
 license = ""
 repository = ""
 edition = "2021"
