@@ -5,18 +5,16 @@
 <h1>Welcome to Tauri!</h1>
 
 <div class="row">
-  <a href="https://vitejs.dev" target="_blank">
+  <!-- <a href="https://vitejs.dev" target="_blank">
     <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-  </a>
-  <a href="https://tauri.app" target="_blank">
-    <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-  </a>
-  <a href="https://kit.svelte.dev" target="_blank">
+  </a> -->
+  <img src="/AzurCraft.svg" class="logo azurcraft" alt="AzurCraft Logo" />
+  <!-- <a href="https://kit.svelte.dev" target="_blank">
     <img src="/svelte.svg" class="logo svelte" alt="Svelte Logo" />
-  </a>
+  </a> -->
 </div>
 
-<p>Click on the Tauri, Vite, and Svelte logos to learn more.</p>
+<p>欢迎使用 Azur Minecraft Manager，请先添加一个管理项</p>
 
 <div class="row">
   <Greet />

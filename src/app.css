@@ -34,6 +34,10 @@
   filter: drop-shadow(0 0 2em #24c8db);
 }
 
+.logo.azurcraft:hover {
+  filter: drop-shadow(0 0 2em #3381ff);
+}
+
 .row {
   display: flex;
   justify-content: center;
