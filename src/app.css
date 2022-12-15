@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;
@@ -30,17 +34,35 @@
   transition: 0.75s;
 }
 
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.logo.azurcraft:hover {
-  filter: drop-shadow(0 0 2em #3381ff);
-}
-
 .row {
   display: flex;
   justify-content: center;
+}
+
+.box {
+  --width: 66%;
+  --min-width: 400px;
+  --max-width: 800px;
+  --height: 50%;
+  --min-height: 400px;
+  --max-height: 600px;
+  position: absolute;
+  width: var(--width);
+  min-width: var(--min-width);
+  max-width: var(--max-width);
+  height: var(--height);
+  min-height: var(--min-height);
+  max-height: var(--max-height);
+  left: calc(50% - max(var(--min-width), min(var(--width), var(--max-width))) / 2);
+  top: calc(50% - max(var(--min-height), min(var(--height), var(--max-height))) / 2);
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: #ff3e00;
+  color: #fff;
+  text-align: center;
+  font-weight: bold;
 }
 
 a {
