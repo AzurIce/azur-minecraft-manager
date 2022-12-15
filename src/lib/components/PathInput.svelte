@@ -34,7 +34,7 @@
 
 <div class="m-2">
     <Label for="input" color={ valid || inputValue.length == 0 ? undefined : "red"} class='block mb-2'>{label}</Label>
-    <div class="row">
+    <div class="flex">
         <Input
             id="input"
             class="bg-white"

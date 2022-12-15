@@ -1,37 +1,70 @@
-<script>
-  import Greet from "$lib/Greet.svelte";
-  import ModalAddTarget from "$lib/ModalAddTarget.svelte";
+<script lang="ts">
+  import { onMount } from "svelte";
+  import { invoke } from "@tauri-apps/api";
+  import ModalAddTarget from "$lib/components/ModalAddTarget.svelte";
+  import CardTarget from "$lib/components/CardTarget.svelte";
   import { Button } from "flowbite-svelte";
+  import type { TargetType, Target } from "$lib/config";
 
+  let targetList: Target[] = [];
+  let modalAddTarget = false;
 
-  let modalAddTarget = true;
+  onMount(async () => {
+    const res = await invoke<string>("get_target_list_json");
+    targetList = JSON.parse(res);
+    console.log(targetList);
+  });
 </script>
 
-<h1>Welcome to Tauri!</h1>
+<!-- <div class="container mx-auto flex flex-col"> -->
+<div class="flex-1 flex flex-col items-center">
+  <img
+    src="/AzurCraft.svg"
+    class="-z-10 absolute h-full m-auto logo azurcraft"
+    alt="AzurCraft Logo"
+  />
 
-<div class="row">
-  <!-- <a href="https://vitejs.dev" target="_blank">
-    <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-  </a> -->
-  <img src="/AzurCraft.svg" class="logo azurcraft" alt="AzurCraft Logo" />
-  <!-- <a href="https://kit.svelte.dev" target="_blank">
-    <img src="/svelte.svg" class="logo svelte" alt="Svelte Logo" />
-  </a> -->
+  {#if targetList.length > 0}
+    <div
+      class="w-full flex flex-wrap flex-1 flex-row gap-4 items-center justify-center bg-white bg-opacity-50 backdrop-blur p-4"
+    >
+      {#each targetList as target (target.location)}
+        <CardTarget targetType={target.kind} targetPath={target.location} />
+        <!-- <CardTarget targetType={TargetType.Local} targetPath="adasda"/>
+        <CardTarget targetType={TargetType.Server} targetPath="adasda"/>
+        <CardTarget targetType={TargetType.Server} targetPath="adasda"/>
+        <CardTarget targetType={TargetType.Local} targetPath="adasda"/> -->
+      {/each}
+      <Button
+        on:click={() => {
+          modalAddTarget = true;
+        }}
+      >
+        + 添加管理项
+      </Button>
+    </div>
+  {:else}
+    <div
+      class="w-full flex flex-1 flex-col items-center justify-center bg-white bg-opacity-50 backdrop-blur"
+    >
+      <p class="my-4">
+        欢迎使用 Azur Minecraft Manager，首先请先添加一个管理项
+      </p>
+      <Button
+        on:click={() => {
+          modalAddTarget = true;
+        }}
+      >
+        + 添加管理项
+      </Button>
+    </div>
+  {/if}
 </div>
+<ModalAddTarget bind:show={modalAddTarget} />
 
-<p>欢迎使用 Azur Minecraft Manager，请先添加一个管理项</p>
-
-<div class="row">
-  <Greet />
-  {modalAddTarget}
-  <Button on:click={()=> {modalAddTarget = true;}}>Add</Button>
-  <ModalAddTarget bind:show={modalAddTarget}/>
-</div>
-
+<!-- </div> -->
 <style>
-.logo.azurcraft:hover {
-  filter: drop-shadow(0 0 2em #3381ff);
-}
-
-
+  .logo.azurcraft:hover {
+    filter: drop-shadow(0 0 2em #3381ff);
+  }
 </style>

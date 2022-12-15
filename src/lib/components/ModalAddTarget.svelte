@@ -9,11 +9,7 @@
     Label,
   } from "flowbite-svelte";
   import PathInput from "./PathInput.svelte";
-
-  enum TargetType {
-    Local = "Local",
-    Server = "Server",
-  }
+  import {TargetType} from "../config";
 
   export let show: boolean;
   let targetType: TargetType = TargetType.Local;
@@ -68,7 +64,7 @@
       <Button
         on:click={() => {
           addTarget().then(() => {
-            invoke("add_target", {targetJsonStr: JSON.stringify({kind: targetType, location: path})})
+            invoke("add_target", {targetJson: JSON.stringify({kind: targetType, location: path})})
             // TODO: 显示结果，成功便关闭Modal
           });
         }}

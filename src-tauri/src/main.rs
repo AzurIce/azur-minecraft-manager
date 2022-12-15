@@ -8,34 +8,35 @@
 
 mod file;
 mod json;
-mod amcm;
+mod api;
+mod config;
 
-use amcm::core::{Core, Target, TargetKind};
+// use api::core::{Core, Target, TargetKind};
 
 /* LAZY_STATIC */
-#[macro_use]
-extern crate lazy_static;
+// #[macro_use]
+// extern crate lazy_static;
 
-lazy_static! {
-    static ref CORE: Core = Core::init();
-}
+// lazy_static! {
+//     static ref CORE: Core = Core::init();
+// }
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust! {:#?}", name, *CORE)
+    format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
-#[tauri::command]
-fn get_target_list() -> String {
-    CORE.config.get_target_list()
-}
+// #[tauri::command]
+// fn get_target_list() -> String {
+//     CORE.config.get_target_list()
+// }
 
-#[tauri::command]
-fn add_target(target_json_str: String) {
-    let target: Target = Target::from_str(target_json_str);
-    // CORE.add_target(target);
-}
+// #[tauri::command]
+// fn add_target(target_json_str: String) {
+//     let target: Target = Target::from_str(target_json_str);
+//     // CORE.add_target(target);
+// }
 
 fn main() {
     tauri::Builder::default()
@@ -44,8 +45,8 @@ fn main() {
             file::is_path_exist,
             json::get_json_str,
             json::save_json_str,
-            get_target_list,
-            add_target,
+            api::target::get_target_list_json,
+            api::target::add_target,
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
