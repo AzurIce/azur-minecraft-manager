@@ -1,6 +1,10 @@
 <script>
   import Greet from "$lib/Greet.svelte";
   import ModalAddTarget from "$lib/ModalAddTarget.svelte";
+  import { Button } from "flowbite-svelte";
+
+
+  let modalAddTarget = true;
 </script>
 
 <h1>Welcome to Tauri!</h1>
@@ -19,7 +23,9 @@
 
 <div class="row">
   <Greet />
-  <ModalAddTarget />
+  {modalAddTarget}
+  <Button on:click={()=> {modalAddTarget = true;}}>Add</Button>
+  <ModalAddTarget bind:show={modalAddTarget}/>
 </div>
 
 <style>
