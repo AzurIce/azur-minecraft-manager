@@ -6,8 +6,14 @@ module.exports = {
   ],
   theme: {
     extend: {},
+    fontWeight: {
+      normal: 400,
+      medium: 600,
+    }
   },
   plugins: [
-    require('flowbite/plugin')
+    require('flowbite/plugin'),
+    require('@tailwindcss/typography'),
   ],
+  darkMode: 'class',
 }

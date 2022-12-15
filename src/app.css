@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Microsoft YaHei UI, Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
@@ -18,14 +18,14 @@
   -webkit-text-size-adjust: 100%;
 }
 
-.container {
+/* .container {
   margin: 0;
   padding-top: 10vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   text-align: center;
-}
+} */
 
 .logo {
   height: 6em;
@@ -39,7 +39,7 @@
   justify-content: center;
 }
 
-.box {
+/* .box {
   --width: 66%;
   --min-width: 400px;
   --max-width: 800px;
@@ -63,7 +63,7 @@
   color: #fff;
   text-align: center;
   font-weight: bold;
-}
+} */
 
 a {
   font-weight: 500;
@@ -79,7 +79,7 @@ h1 {
   text-align: center;
 }
 
-input,
+/* input,
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -91,9 +91,9 @@ button {
   background-color: #ffffff;
   transition: border-color 0.25s;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
+} */
 
-button {
+/* button {
   cursor: pointer;
 }
 
@@ -104,7 +104,7 @@ button:hover {
 input,
 button {
   outline: none;
-}
+} */
 
 #greet-input {
   margin-right: 5px;

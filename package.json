@@ -12,12 +12,14 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1.2.0"
+    "@tauri-apps/api": "^1.2.0",
+    "remixicon": "^2.5.0"
   },
   "devDependencies": {
     "@popperjs/core": "^2.11.6",
     "@sveltejs/adapter-static": "next",
     "@sveltejs/kit": "next",
+    "@tailwindcss/typography": "^0.5.8",
     "@tauri-apps/cli": "^1.2.2",
     "autoprefixer": "^10.4.13",
     "classnames": "^2.3.2",

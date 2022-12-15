@@ -9,8 +9,18 @@ pub enum TargetKind {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Target {
-    kind: TargetKind,
-    location: String,
+    pub kind: TargetKind,
+    pub location: String,
+}
+
+impl Target {
+    pub fn from_str(value: String) -> Target {
+        serde_json::from_str(&value).unwrap()
+    }
+
+    pub fn to_str(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -27,11 +37,11 @@ impl Config {
         serde_json::to_string(&self.targets).unwrap()
     }
 
-    fn from_string(value: String) -> Config {
+    pub fn from_string(value: String) -> Config {
         serde_json::from_str(&value).unwrap()
     }
 
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         serde_json::to_string(self).unwrap()
     }
 }
@@ -66,6 +76,10 @@ impl Core {
             config: Config::default(),
             data: Data::default()
         }
+    }
+
+    pub fn add_target(&mut self, target: Target) {
+        self.config.targets.push(target);
     }
 
     fn reload_data(&self) {

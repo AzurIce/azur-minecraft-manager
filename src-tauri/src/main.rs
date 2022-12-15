@@ -10,7 +10,7 @@ mod file;
 mod json;
 mod amcm;
 
-use amcm::core::Core;
+use amcm::core::{Core, Target, TargetKind};
 
 /* LAZY_STATIC */
 #[macro_use]
@@ -31,6 +31,12 @@ fn get_target_list() -> String {
     CORE.config.get_target_list()
 }
 
+#[tauri::command]
+fn add_target(target_json_str: String) {
+    let target: Target = Target::from_str(target_json_str);
+    // CORE.add_target(target);
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -38,7 +44,8 @@ fn main() {
             file::is_path_exist,
             json::get_json_str,
             json::save_json_str,
-            get_target_list
+            get_target_list,
+            add_target,
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
