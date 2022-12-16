@@ -1,9 +1,12 @@
 <script lang="ts">
   import { Card, Button } from "flowbite-svelte";
-  import { TargetType } from "$lib/config";
+  import { Target, TargetType } from "$lib/config";
+  import { goto } from "$app/navigation";
 
-  export let targetType: TargetType;
-  export let targetPath: string;
+  export let target: Target;
+  export let id: number;
+  $: targetType = target.kind;
+  $: targetPath = target.location;
 
   $: icon = targetType == TargetType.Local ? "ri-save-line" : "ri-cloud-line";
 </script>
@@ -13,7 +16,7 @@
     class="w-30 flex gap-2 mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white"
   >
     <i class={icon} />
-    <span>{targetType}</span>
+    <span>{targetType == TargetType.Local ? "本地" : "服务器"}</span>
   </div>
 
   <div
@@ -21,7 +24,7 @@
   >
     {targetPath}
   </div>
-  <Button class="w-fit" on:click={() => {}}>
-    Manage
+  <Button class="w-fit" on:click={() => {goto(`/manage/${id}`)}}>
+    管理
   </Button>
 </Card>

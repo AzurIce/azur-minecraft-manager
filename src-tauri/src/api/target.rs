@@ -6,6 +6,11 @@ pub fn get_target_list_json() -> String {
 }
 
 #[tauri::command]
+pub fn get_target_json(id: usize) -> String {
+    config::get_config().get_target_json(id)
+}
+
+#[tauri::command]
 pub fn add_target(target_json: String) {
     let target = config::Target::from_str(target_json);
 

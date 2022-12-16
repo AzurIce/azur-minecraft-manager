@@ -46,6 +46,7 @@ fn main() {
             json::get_json_str,
             json::save_json_str,
             api::target::get_target_list_json,
+            api::target::get_target_json,
             api::target::add_target,
             ])
         .run(tauri::generate_context!())

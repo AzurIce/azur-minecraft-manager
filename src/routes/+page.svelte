@@ -12,7 +12,7 @@
   onMount(async () => {
     const res = await invoke<string>("get_target_list_json");
     targetList = JSON.parse(res);
-    console.log(targetList);
+    // console.log(targetList);
   });
 </script>
 
@@ -28,8 +28,8 @@
     <div
       class="w-full flex flex-wrap flex-1 flex-row gap-4 items-center justify-center bg-white bg-opacity-50 backdrop-blur p-4"
     >
-      {#each targetList as target (target.location)}
-        <CardTarget targetType={target.kind} targetPath={target.location} />
+      {#each targetList as target, i (target)}
+        <CardTarget target={target} id={i}/>
         <!-- <CardTarget targetType={TargetType.Local} targetPath="adasda"/>
         <CardTarget targetType={TargetType.Server} targetPath="adasda"/>
         <CardTarget targetType={TargetType.Server} targetPath="adasda"/>

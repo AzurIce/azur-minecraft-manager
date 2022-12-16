@@ -39,6 +39,10 @@ impl Config {
         serde_json::to_string(&self.targets).unwrap()
     }
 
+    pub fn get_target_json(&self, id: usize) -> String {
+        self.targets.get(id).unwrap().to_str()
+    }
+
     pub fn add_target(&mut self, target: Target) {
         self.targets.push(target);
     }
