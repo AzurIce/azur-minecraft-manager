@@ -9,7 +9,7 @@
     Label,
   } from "flowbite-svelte";
   import PathInput from "./PathInput.svelte";
-  import {TargetType} from "../config";
+  import {TargetType} from "../typing";
 
   export let show: boolean;
   let targetType: TargetType = TargetType.Local;

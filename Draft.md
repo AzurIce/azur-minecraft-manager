@@ -1,6 +1,13 @@
+一个本地的 Mod 文件可以分为两种情况：
 
+- **本地 Mod**：无法与任何 Mod 平台中的 Mod 对应
+- **非本地 Mod**：可以与 Mod 平台中的 Mod 对应。
 
+他们之间也存在着信息差异，往往获取前者的信息只能通过 Mod 文件本身来提取，较为受限，而后者则可以利用平台 API 获取更多的信息。
 
+## ModSource
+
+ModSource 为对应着远端 Mod 网站中的 Mod本身的信息。而非具体的某一个本地 Mod 文件。
 
 ## ModFile 解析
 
@@ -14,8 +21,7 @@ pub struct ModFile {
     mod_loader: ModLoader, // From file's zipped content
     mod_id: String,
     mod_version: String,
-    game_version: String,
-    belong_mod: Mod, // From modrinth API(get vsha1)
+    belong_mod: ModSource, // From modrinth API(get version from sha1)
 }
 ```
 
@@ -26,7 +32,6 @@ pub struct ModFile {
   - `mod_loader` 此 ModFile 所支持的 Modloader
   - `mod_id` 此 ModFile 的标识符
   - `mod_version` 此 ModFile 的版本
-  - `game_version` 此 ModFile 对应的游戏版本
 - 通过 Modrinth API 获取的信息
   - `belong_mod` 所属的 Mod
 

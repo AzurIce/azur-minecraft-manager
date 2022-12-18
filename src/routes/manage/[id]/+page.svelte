@@ -1,47 +1,62 @@
 <script lang="ts">
-  import type { Target } from "$lib/config";
-  import { Breadcrumb, BreadcrumbItem } from "flowbite-svelte";
+  import type { ModFile, Target } from "$lib/typing";
+  import { Breadcrumb, BreadcrumbItem, Card } from "flowbite-svelte";
   import { Tabs, TabItem, Button } from "flowbite-svelte";
   import { invoke } from "@tauri-apps/api";
   import { join } from "@tauri-apps/api/path";
+
+  import CardModFile from "$lib/components/CardModFile.svelte";
 
   /** @type {import('./$types').PageData} */
   export let data: { target: Target };
   $: targetType = data.target.kind;
   $: targetPath = data.target.location;
 
-  let modFileList = [];
+  let modFilenameList: Array<string> = [];
 
   import { onMount } from "svelte";
-  onMount(() => {
-    invoke("get_mod_filename_list", {path: targetPath}).then((res) => {
-      modFileList = (res as Array<string>).map((v) => {
-        
-      })
-    })
-  })
+  onMount(async () => {
+    // invoke<Array<ModFile>>("get_mod_file_list", {
+    //   path: await join(targetPath, "mods"),
+    // }).then((res) => {
+    //   modFileList = res;
+    //   modFileList.forEach(async (modFile) => {
+    //     invoke<ModFile>("get_belonged_mod_file", {
+    //       path: await join(targetPath, "mods", modFile.filename),
+    //     }).then((res) => {
+    //       modFile.belong_mod = res.belong_mod;
+    //       console.log(modFileList);
+    //     });
+    //   });
+    // });
+    modFilenameList = await invoke<Array<string>>("get_mod_filename_list", {path: await join(targetPath, "mods")})
+  });
+
+  async function test() {
+    invoke("get_belonged_mod_file", {
+      path: await join(targetPath, "mods", "appleskin-fabric-mc1.19-2.4.1.jar"),
+    }).then((res) => {
+      console.log(res);
+      console.log(res as ModFile);
+    });
+    // console.log(await join(targetPath, "mods"));
+    // invoke("get_mod_file_list", {path: await join(targetPath, "mods")}).then((res) => {
+    //   console.log(res);
+    // })
+  }
 </script>
 
-<div class="flex flex-col bg-white p-4 gap-2">
-  <Button
-    on:click={async () => {
-      // invoke("get_mod_from_hash", {sha1:"27AB78BB9DBA64010AA63D1F0B06108132569EAC"}).then((res) => {
-      //   console.log(res);
-      // })
-      console.log(await join(targetPath, "mods"));
-      invoke("get_mod_file_list", {
-        path: await join(targetPath, "mods"),
-      }).then((res) => {
-        console.log(res);
-      });
-    }}
-  />
+<div class="flex flex-col flex-1 bg-white p-4 gap-2 overflow-y-auto">
+  <Button on:click={test} />
   <Breadcrumb aria-label="Default breadcrumb example">
     <BreadcrumbItem href="/" home>主页</BreadcrumbItem>
     <BreadcrumbItem>管理</BreadcrumbItem>
   </Breadcrumb>
   <Tabs>
     <TabItem open title="Mod">
+      {#each modFilenameList as filename (filename)}
+        <CardModFile {filename} {targetPath} />
+      {/each}
       <p class="text-sm text-gray-500 dark:text-gray-400">
         <b>Profile:</b> Lorem ipsum dolor sit amet, consectetur adipiscing elit,
         sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.

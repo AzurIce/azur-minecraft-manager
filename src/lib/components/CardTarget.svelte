@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Card, Button } from "flowbite-svelte";
-  import { Target, TargetType } from "$lib/config";
+  import { type Target, TargetType } from "$lib/typing";
   import { goto } from "$app/navigation";
 
   export let target: Target;
