@@ -10,6 +10,8 @@ mod file;
 mod json;
 mod api;
 mod config;
+mod modrinth;
+mod modloader;
 
 // use api::core::{Core, Target, TargetKind};
 
@@ -48,6 +50,9 @@ fn main() {
             api::target::get_target_list_json,
             api::target::get_target_json,
             api::target::add_target,
+            api::mcmod::get_mod_filename_list,
+            config::get_mod_file_list,
+            config::get_mod_file,
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
