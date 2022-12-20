@@ -22,6 +22,7 @@ once_cell = "1.16.0"
 zip = "0.6.3"
 sha = "1.0.3"
 ferinth = "2"
+jasondb = "0.2.6"
 
 [features]
 # by default Tauri runs in production mode

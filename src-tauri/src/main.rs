@@ -8,21 +8,28 @@
 
 mod file;
 mod json;
-mod api;
+mod cmd;
 mod config;
 mod modrinth;
 mod modloader;
 mod mcmod;
+mod amcm;
 
 // use api::core::{Core, Target, TargetKind};
 
+use amcm::Core;
+use std::sync::Mutex;
 /* LAZY_STATIC */
-// #[macro_use]
-// extern crate lazy_static;
+#[macro_use]
+extern crate lazy_static;
 
-// lazy_static! {
-//     static ref CORE: Core = Core::init();
-// }
+lazy_static! {
+    static ref CORE: Mutex<Core> = Mutex::new(Core::init());
+}
+/* ONCE_CELL */
+// use once_cell::sync::Lazy;
+
+// static CORE: Mutex<Core>
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -48,12 +55,13 @@ fn main() {
             file::is_path_exist,
             json::get_json_str,
             json::save_json_str,
-            api::target::get_target_list_json,
-            api::target::get_target_json,
-            api::target::add_target,
-            api::mcmod::get_mod_file_list,
-            api::mcmod::get_mod_filename_list,
-            api::mcmod::get_belonged_mod_file,
+            cmd::target::get_target_list,
+            cmd::target::get_target,
+            cmd::target::add_target,
+            cmd::target::del_target,
+            cmd::mcmod::get_mod_file_list,
+            cmd::mcmod::get_mod_filename_list,
+            // cmd::mcmod::get_belonged_mod_file,
             // api::mcmod::get_mod_filename_list,
             // config::get_mod_file_list,
             // config::get_mod_file,

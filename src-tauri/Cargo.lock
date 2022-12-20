@@ -94,6 +94,7 @@ name = "azur-minecraft-manager"
 version = "0.0.0"
 dependencies = [
  "ferinth",
+ "jasondb",
  "lazy_static",
  "once_cell",
  "serde",
@@ -1256,6 +1257,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4a1e36c821dbe04574f602848a19f742f4fb3c98d40449f11bcad18d6b17421"
 
 [[package]]
+name = "humphrey_json"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c6a609c321218062a6faa842d1a7a0bf763fc771aaf1e159e80bcd077ad0120a"
+dependencies = [
+ "humphrey_json_derive",
+]
+
+[[package]]
+name = "humphrey_json_derive"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "008481d0f197174a20ee9da784c43c8845635048bc7b9cc68f7e0601cb3368c2"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "hyper"
 version = "0.14.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1418,6 +1439,15 @@ name = "itoa"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4217ad341ebadf8d8e724e264f13e593e0648f5b3e94b3896a5df283be015ecc"
+
+[[package]]
+name = "jasondb"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "898a9ad3e27609ca99b4c82c45d9d783702f8fbb6069aafc70864bc99cf79a8f"
+dependencies = [
+ "humphrey_json",
+]
 
 [[package]]
 name = "javascriptcore-rs"

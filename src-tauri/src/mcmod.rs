@@ -75,40 +75,40 @@ impl ModFile {
     }
 }
 
-use ferinth::{Ferinth, Error};
-use crate::modrinth;
-pub async fn get_belonged_mod_file(path: PathBuf) -> Result<ModFile, Error> {
-    let mut mod_file = ModFile::of(path);
-    println!("{:#?} {:#?}", mod_file.filename, mod_file.sha1);
+// use ferinth::{Ferinth, Error};
+// use crate::modrinth;
+// pub async fn get_belonged_mod_file(path: PathBuf) -> Result<ModFile, Error> {
+//     let mut mod_file = ModFile::of(path);
+//     println!("{:#?} {:#?}", mod_file.filename, mod_file.sha1);
 
-    let modrinth = Ferinth::default();
-    // Get version from hash
-    let version = modrinth.get_version_from_hash(&mod_file.sha1).await?;
-    let game_versions = version.game_versions;
+//     let modrinth = Ferinth::default();
+//     // Get version from hash
+//     let version = modrinth::ModrinthAPI::get_version_from_hash(&mod_file.sha1, false).await?;
+//     let game_versions = version.game_versions;
 
-    // Get project from id
-    if let Ok(belong_mod) = modrinth::get_mod(version.project_id).await {
-        mod_file = ModFile {
-            belong_mod,
-            game_versions,
-            ..mod_file
-        };
-    }
+//     // Get project from id
+//     if let Ok(belong_mod) = modrinth::get_mod(version.project_id, false).await {
+//         mod_file = ModFile {
+//             belong_mod,
+//             game_versions,
+//             ..mod_file
+//         };
+//     }
 
-    // Informations from file's zipped content
-    // let reader = BufReader::new(file);
-    // let mut archive = zip::ZipArchive::new(reader).unwrap();
-    // if let Ok(mut fabric_mod_json_file) = archive.by_name("fabric.mod.json") {
-    //     let mut buf = String::new();
-    //     fabric_mod_json_file.read_to_string(&mut buf).expect("Read fabric.mod.json failed");
-    //     if let Ok(fabric_mod_json) = serde_json::from_str(&buf) as Result<modloader::ModLoaderFile> {
-    //         mod_file = ModFile {
-    //             mod_id: fabric_mod_json.id,
-    //             mod_version: fabric_mod_json.version,
-    //             ..mod_file
-    //         };
-    //     }
-    // }
+//     // Informations from file's zipped content
+//     // let reader = BufReader::new(file);
+//     // let mut archive = zip::ZipArchive::new(reader).unwrap();
+//     // if let Ok(mut fabric_mod_json_file) = archive.by_name("fabric.mod.json") {
+//     //     let mut buf = String::new();
+//     //     fabric_mod_json_file.read_to_string(&mut buf).expect("Read fabric.mod.json failed");
+//     //     if let Ok(fabric_mod_json) = serde_json::from_str(&buf) as Result<modloader::ModLoaderFile> {
+//     //         mod_file = ModFile {
+//     //             mod_id: fabric_mod_json.id,
+//     //             mod_version: fabric_mod_json.version,
+//     //             ..mod_file
+//     //         };
+//     //     }
+//     // }
 
-    Ok(mod_file)
-}
+//     Ok(mod_file)
+// }

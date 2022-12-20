@@ -9,7 +9,10 @@
     Label,
   } from "flowbite-svelte";
   import PathInput from "./PathInput.svelte";
-  import {TargetType} from "../typing";
+  import { TargetType, type Target } from "../typing";
+  import { createEventDispatcher } from "svelte";
+
+  const dispatch = createEventDispatcher();
 
   export let show: boolean;
   let targetType: TargetType = TargetType.Local;
@@ -24,7 +27,20 @@
 
   $: valid = targetType == TargetType.Local ? validLocal : validServer;
 
-  async function addTarget() {}
+  async function addTarget() {
+    let target: Target = {
+      kind: targetType,
+      location: path,
+    };
+
+    invoke("add_target", {
+      target: target,
+    }).then((res) => {
+      show = false;
+      dispatch("added", { targets: res });
+    });
+    // TODO: 显示结果，成功便关闭Modal
+  }
 </script>
 
 <Modal title="添加一个管理项" bind:open={show}>
@@ -38,7 +54,7 @@
       <span slot="title">本地 .minecraft/ 目录</span>
       <div class="mb-6">
         <PathInput
-          bind:path={path}
+          bind:path
           bind:valid={pathValid}
           placeholder="输入你的 .minecraft/ 目录的路径"
           label=".minecraft 目录路径"
@@ -61,16 +77,7 @@
     {#if !valid}
       <Button disabled>添加</Button>
     {:else}
-      <Button
-        on:click={() => {
-          addTarget().then(() => {
-            invoke("add_target", {targetJson: JSON.stringify({kind: targetType, location: path})})
-            // TODO: 显示结果，成功便关闭Modal
-          });
-        }}
-      >
-        添加
-      </Button>
+      <Button on:click={addTarget}>添加</Button>
     {/if}
     <Button color="alternative">取消</Button>
   </svelte:fragment>

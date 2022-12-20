@@ -2,6 +2,10 @@
   import { Card, Button } from "flowbite-svelte";
   import { type Target, TargetType } from "$lib/typing";
   import { goto } from "$app/navigation";
+  import { invoke } from "@tauri-apps/api";
+  import { createEventDispatcher } from "svelte";
+
+  const dispatch = createEventDispatcher();
 
   export let target: Target;
   export let id: number;
@@ -24,7 +28,16 @@
   >
     {targetPath}
   </div>
-  <Button class="w-fit" on:click={() => {goto(`/manage/${id}`)}}>
-    管理
-  </Button>
+  <div class="flex gap-2">
+    <Button class="w-fit" on:click={() => {goto(`/manage/${id}`)}}>
+      管理
+    </Button>
+    <Button class="w-fit" color="red" outline on:click={() => {
+      invoke("del_target", {index: id}).then((res) => {
+        dispatch('deleted', {targets: res});
+      })
+    }}>
+      删除
+    </Button>
+  </div>
 </Card>

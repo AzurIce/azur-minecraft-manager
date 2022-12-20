@@ -1,8 +1,5 @@
 use std::fs;
-use ferinth::Error;
-use crate::modrinth;
-use crate::modloader;
-use crate::mcmod::{self, ModFile};
+use crate::mcmod::ModFile;
 
 #[tauri::command]
 pub fn get_mod_file_list(path: String) -> Vec<ModFile> {
@@ -28,10 +25,10 @@ pub fn get_mod_filename_list(path: String) -> Vec<String> {
     mod_filename_list
 }
 
-#[tauri::command]
-pub async fn get_belonged_mod_file(path: String) -> Result<ModFile, String> {
-    match mcmod::get_belonged_mod_file(path.into()).await {
-        Ok(mod_file) => Ok(mod_file),
-        Err(error) => Err(error.to_string())
-    }
-}
+// #[tauri::command]
+// pub async fn get_belonged_mod_file(path: String) -> Result<ModFile, String> {
+//     match mcmod::get_belonged_mod_file(path.into()).await {
+//         Ok(mod_file) => Ok(mod_file),
+//         Err(error) => Err(error.to_string())
+//     }
+// }

@@ -10,10 +10,14 @@
   let modalAddTarget = false;
 
   onMount(async () => {
-    const res = await invoke<string>("get_target_list_json");
-    targetList = JSON.parse(res);
+    targetList = await invoke<Target[]>("get_target_list");
+    // targetList = JSON.parse(res);
     // console.log(targetList);
   });
+
+  function onUpdateTargets(event: CustomEvent) {
+    targetList = event.detail.targets;
+  }
 </script>
 
 <!-- <div class="container mx-auto flex flex-col"> -->
@@ -29,7 +33,7 @@
       class="w-full flex flex-wrap flex-1 flex-row gap-4 items-center justify-center bg-white bg-opacity-50 backdrop-blur p-4"
     >
       {#each targetList as target, i (target)}
-        <CardTarget target={target} id={i}/>
+        <CardTarget target={target} id={i} on:deleted={onUpdateTargets}/>
         <!-- <CardTarget targetType={TargetType.Local} targetPath="adasda"/>
         <CardTarget targetType={TargetType.Server} targetPath="adasda"/>
         <CardTarget targetType={TargetType.Server} targetPath="adasda"/>
@@ -60,7 +64,7 @@
     </div>
   {/if}
 </div>
-<ModalAddTarget bind:show={modalAddTarget} />
+<ModalAddTarget bind:show={modalAddTarget} on:added={onUpdateTargets}/>
 
 <!-- </div> -->
 <style>
