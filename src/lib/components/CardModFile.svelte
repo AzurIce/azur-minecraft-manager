@@ -1,31 +1,31 @@
 <script lang="ts">
   import type { ModFile, Mod } from "$lib/typing";
-  import { Badge, P } from "flowbite-svelte";
+  import { Badge, P, Img } from "flowbite-svelte";
 
-  enum State {
-    Loading,
-    NoBelong,
-    Modrinth,
+  enum BelongState {
+    Unknown = "Unknown",
+    Modrinth = "Modrinth",
   }
 
-  export let file: { filename: string; sha1: string };
+  export let file: { filename: string; sha1: string; belong_state: BelongState };
   export let targetPath: string;
-  let modFile: any = {};
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api";
   import { join } from "@tauri-apps/api/path";
 
-  let loading: boolean = true;
+  let version: any;
+  let project: any = {
+    title: "",
+    description: "",
+    icon_url: "",
+  };
 
-  // onMount(async () => {
-  //   invoke<ModFile>("get_belonged_mod_file", {
-  //     path: await join(targetPath, "mods", filename),
-  //   }).then((res) => {
-  //     loading = false;
-  //     modFile = res;
-  //     console.log(modFile);
-  //   });
-  // });
+  onMount(async () => {
+    if (file.belong_state == BelongState.Modrinth) {
+      version = await invoke("get_version_from_hash", {hash: file.sha1});
+      project = await invoke("get_project_from_hash", {hash: file.sha1});
+    }
+  });
 </script>
 
 <div
@@ -33,21 +33,29 @@
 >
   <div class="flex flex-col gap-1">
     <div class="flex items-center gap-2">
-      <P>{file.filename}</P>
+      {#if file.belong_state == BelongState.Modrinth}
+      <P>{project.title}</P>
       <Badge>Modrinth</Badge>
+      {:else}
+      <P>{file.filename}</P>
+      <Badge color="dark">Unknown</Badge>
+      {/if}
       <!-- <span class="badge ml-2" v-if="isFabricMod">Fabric</span> -->
       <!-- <span class="badge badge-error ml-2" v-if="isBadJsonSyntax">BadJsonSyntax</span> -->
     </div>
-    <div class="flex">
-      <div class="w-16 h-16 bg-gray-200 rounded text-center">Icon</div>
-      <div class="flex flex-col">
-        {#if !loading}
-          <span class="ml-2">filename: {modFile.filename}</span>
-          <span class="ml-2">modDesc: {modFile.belong_mod.desc}</span>
-        {/if}
-        <!-- <span class="ml-2">gameVersion: {{ gameVersion }}</span> -->
+    {#if file.belong_state == BelongState.Modrinth}
+      <div class="flex h-16">
+        <Img class="w-16 h-16 bg-gray-200 rounded text-center flex-none" src={project.icon_url}/>
+        <div class="flex flex-col flex-1">
+            <P class="ml-2" size="sm">文件名: {file.filename}</P>
+            <P class="ml-2" size="sm">描述: {project.description}</P>
+          <!-- <span class="ml-2">gameVersion: {{ gameVersion }}</span> -->
+        </div>
+        <div class="w-20">
+
+        </div>
       </div>
-    </div>
+    {/if}
     <!-- <span class="text-gray-400">modId: {{ modId }}</span> -->
   </div>
 

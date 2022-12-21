@@ -13,24 +13,29 @@
   $: targetPath = data.target.location;
 
   let fileList: Array<any> = [];
+  let versions: Map<string, any> = new Map();
+  let projects: Map<string, any> = new Map();
 
+  let loading = true;
   import { onMount } from "svelte";
   onMount(async () => {
-    // invoke<Array<ModFile>>("get_mod_file_list", {
-    //   path: await join(targetPath, "mods"),
-    // }).then((res) => {
-    //   modFileList = res;
-    //   modFileList.forEach(async (modFile) => {
-    //     invoke<ModFile>("get_belonged_mod_file", {
-    //       path: await join(targetPath, "mods", modFile.filename),
-    //     }).then((res) => {
-    //       modFile.belong_mod = res.belong_mod;
-    //       console.log(modFileList);
-    //     });
-    //   });
-    // });
-    fileList = await invoke<Array<any>>("get_mod_file_list", {path: await join(targetPath, "mods")})
+    await getModFileList();
+    loading = false;
   });
+
+  async function getModFileList() {
+    fileList = await invoke<Array<any>>("get_mod_file_list", {
+      path: await join(targetPath, "mods"),
+    });
+  }
+
+  async function updateData() {
+    invoke("update_data_from_hashes", {hashes: fileList.map(file => file.sha1)}).then((res) => {
+      console.log(res);
+    }).catch((err) => {
+      console.log(err);
+    })
+  }
 
   async function test() {
     invoke("get_belonged_mod_file", {
@@ -54,9 +59,14 @@
   </Breadcrumb>
   <Tabs>
     <TabItem open title="Mod">
-      {#each fileList as file (file.sha1)}
-        <CardModFile {file} {targetPath} />
-      {/each}
+      <div class="m-1 mb-2">
+        <Button on:click={updateData}>更新 Modrinth 信息</Button>
+      </div>
+      {#if loading}Loading...{:else}
+        {#each fileList as file (file.sha1)}
+          <CardModFile {file} {targetPath} />
+        {/each}
+      {/if}
       <p class="text-sm text-gray-500 dark:text-gray-400">
         <b>Profile:</b> Lorem ipsum dolor sit amet, consectetur adipiscing elit,
         sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.

@@ -16,7 +16,7 @@ mod mcmod;
 mod amcm;
 
 /* LAZY_STATIC */
-use std::sync::Mutex;
+use tokio::sync::Mutex;
 #[macro_use]
 extern crate lazy_static;
 
@@ -46,6 +46,8 @@ fn main() {
             cmd::mcmod::update_data_from_hash,
             cmd::mcmod::get_version_from_hash,
             cmd::mcmod::get_project_from_hash,
+            cmd::mcmod::get_version_from_hashes,
+            cmd::mcmod::get_project_from_hashes,
             // cmd::mcmod::get_mod_filename_list,
             // cmd::mcmod::get_belonged_mod_file,
             // api::mcmod::get_mod_filename_list,
