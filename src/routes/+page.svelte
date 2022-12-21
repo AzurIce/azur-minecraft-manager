@@ -30,14 +30,10 @@
 
   {#if targetList.length > 0}
     <div
-      class="w-full flex flex-wrap flex-1 flex-row gap-4 items-center justify-center bg-white bg-opacity-50 backdrop-blur p-4"
+      class="w-full flex flex-wrap flex-1 flex-row gap-4 items-center justify-start content-start bg-white bg-opacity-50 backdrop-blur p-4"
     >
       {#each targetList as target, i (target)}
-        <CardTarget target={target} id={i} on:deleted={onUpdateTargets}/>
-        <!-- <CardTarget targetType={TargetType.Local} targetPath="adasda"/>
-        <CardTarget targetType={TargetType.Server} targetPath="adasda"/>
-        <CardTarget targetType={TargetType.Server} targetPath="adasda"/>
-        <CardTarget targetType={TargetType.Local} targetPath="adasda"/> -->
+        <CardTarget {target} id={i} on:deleted={onUpdateTargets} />
       {/each}
       <Button
         on:click={() => {
@@ -64,7 +60,7 @@
     </div>
   {/if}
 </div>
-<ModalAddTarget bind:show={modalAddTarget} on:added={onUpdateTargets}/>
+<ModalAddTarget bind:show={modalAddTarget} on:added={onUpdateTargets} />
 
 <!-- </div> -->
 <style>

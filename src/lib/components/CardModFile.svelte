@@ -1,8 +1,14 @@
 <script lang="ts">
   import type { ModFile, Mod } from "$lib/typing";
-  import { Card } from "flowbite-svelte";
+  import { Badge, P } from "flowbite-svelte";
 
-  export let filename: string;
+  enum State {
+    Loading,
+    NoBelong,
+    Modrinth,
+  }
+
+  export let file: { filename: string; sha1: string };
   export let targetPath: string;
   let modFile: any = {};
   import { onMount } from "svelte";
@@ -11,23 +17,24 @@
 
   let loading: boolean = true;
 
-  onMount(async () => {
-    invoke<ModFile>("get_belonged_mod_file", {
-      path: await join(targetPath, "mods", filename),
-    }).then((res) => {
-      loading = false;
-      modFile = res;
-      console.log(modFile);
-    });
-  });
+  // onMount(async () => {
+  //   invoke<ModFile>("get_belonged_mod_file", {
+  //     path: await join(targetPath, "mods", filename),
+  //   }).then((res) => {
+  //     loading = false;
+  //     modFile = res;
+  //     console.log(modFile);
+  //   });
+  // });
 </script>
 
 <div
-  class="bg-white rounded-md shadow-sm border w-full p-2 m-1 flex items-center"
+  class="bg-white rounded-md shadow-sm border w-full p-3 m-1 flex items-center"
 >
   <div class="flex flex-col gap-1">
-    <div class="flex items-center">
-      <h2>{filename}</h2>
+    <div class="flex items-center gap-2">
+      <P>{file.filename}</P>
+      <Badge>Modrinth</Badge>
       <!-- <span class="badge ml-2" v-if="isFabricMod">Fabric</span> -->
       <!-- <span class="badge badge-error ml-2" v-if="isBadJsonSyntax">BadJsonSyntax</span> -->
     </div>
@@ -35,8 +42,8 @@
       <div class="w-16 h-16 bg-gray-200 rounded text-center">Icon</div>
       <div class="flex flex-col">
         {#if !loading}
-        <span class="ml-2">filename: {modFile.filename}</span>
-        <span class="ml-2">modDesc: { modFile.belong_mod.desc }</span>
+          <span class="ml-2">filename: {modFile.filename}</span>
+          <span class="ml-2">modDesc: {modFile.belong_mod.desc}</span>
         {/if}
         <!-- <span class="ml-2">gameVersion: {{ gameVersion }}</span> -->
       </div>

@@ -12,7 +12,7 @@
   $: targetType = data.target.kind;
   $: targetPath = data.target.location;
 
-  let modFilenameList: Array<string> = [];
+  let fileList: Array<any> = [];
 
   import { onMount } from "svelte";
   onMount(async () => {
@@ -29,7 +29,7 @@
     //     });
     //   });
     // });
-    modFilenameList = await invoke<Array<string>>("get_mod_filename_list", {path: await join(targetPath, "mods")})
+    fileList = await invoke<Array<any>>("get_mod_file_list", {path: await join(targetPath, "mods")})
   });
 
   async function test() {
@@ -54,8 +54,8 @@
   </Breadcrumb>
   <Tabs>
     <TabItem open title="Mod">
-      {#each modFilenameList as filename (filename)}
-        <CardModFile {filename} {targetPath} />
+      {#each fileList as file (file.sha1)}
+        <CardModFile {file} {targetPath} />
       {/each}
       <p class="text-sm text-gray-500 dark:text-gray-400">
         <b>Profile:</b> Lorem ipsum dolor sit amet, consectetur adipiscing elit,
