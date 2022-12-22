@@ -5,37 +5,27 @@
 )]
 
 /* MODULESS */
-
-mod file;
-mod json;
+mod utils;
+// mod json;
 mod cmd;
-mod config;
-mod modrinth;
-mod modloader;
-mod mcmod;
+// mod modrinth;
+// mod modloader;
+// mod mcmod;
 mod amcm;
 
 /* LAZY_STATIC */
 use tokio::sync::Mutex;
+use amcm::core::Core;
 #[macro_use]
 extern crate lazy_static;
 
 lazy_static! {
-    static ref CORE: Mutex<amcm::Core> = Mutex::new(amcm::Core::init());
-}
-
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+    static ref CORE: Mutex<Core> = Mutex::new(Core::init());
 }
 
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            // greet,
-            // file::is_path_exist,
-            // json::get_json_str,
-            // json::save_json_str,
             cmd::load,
             cmd::target::get_target_list,
             cmd::target::get_target,
@@ -48,11 +38,6 @@ fn main() {
             cmd::mcmod::get_project_from_hash,
             cmd::mcmod::get_version_from_hashes,
             cmd::mcmod::get_project_from_hashes,
-            // cmd::mcmod::get_mod_filename_list,
-            // cmd::mcmod::get_belonged_mod_file,
-            // api::mcmod::get_mod_filename_list,
-            // config::get_mod_file_list,
-            // config::get_mod_file,
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
