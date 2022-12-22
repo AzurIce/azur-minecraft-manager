@@ -8,50 +8,70 @@
   import CardModFile from "$lib/components/CardModFile.svelte";
 
   /** @type {import('./$types').PageData} */
-  export let data: { target: Target };
+  export let data: { index: number; target: Target };
   $: targetType = data.target.kind;
   $: targetPath = data.target.location;
+  $: index = data.index;
 
   let fileList: Array<any> = [];
 
-  import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-  
+  import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
+
   let unlisten: UnlistenFn;
   let loading = true;
   import { onDestroy, onMount } from "svelte";
-  onMount(async () => {
+  import { afterNavigate, beforeNavigate } from "$app/navigation";
+  onMount(async () => {});
+
+  onDestroy(() => {});
+
+  // Leaving
+  beforeNavigate((navigation) => {
+    console.log("beforeNavigate");
+    unlisten();
+    emit("unwatch_mod_files");
+    // invoke("leave_manage_target", { index: index, window: appWindow });
+  });
+  // Entering
+  afterNavigate(async (navigation) => {
+    console.log("afterNavigate");
     await getModFileList();
     loading = false;
-    unlisten = await listen<Array<any>>("mod-list-updated", (event) => {
+    unlisten = await listen<Array<any>>("mod_files_updated", (event) => {
+      console.log("mod_files_updated");
       fileList = event.payload;
-    })
+    });
+
+    invoke("watch_mod_files", { dir: await join(targetPath, "mods") });
   });
 
-  onDestroy(() => {
-    unlisten();
-  })
-
   async function getModFileList() {
-    fileList = await invoke<Array<any>>("get_mod_file_list", {
-      path: await join(targetPath, "mods"),
-    });
+    // fileList = await invoke<Array<any>>("get_mod_file_list", {
+    //   path: await join(targetPath, "mods"),
+    // });
+    fileList = await invoke<Array<any>>("get_mod_files");
   }
 
   async function updateData() {
-    invoke("update_data_from_hashes", {hashes: fileList.map(file => file.sha1)}).then((res) => {
-      console.log("Updated data from hashes");
-    }).catch((err) => {
-      console.log(err);
+    invoke("update_data_from_hashes", {
+      hashes: fileList.map((file) => file.sha1),
     })
+      .then((res) => {
+        console.log("Updated data from hashes");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
-  async function test() {
-    invoke("get_belonged_mod_file", {
-      path: await join(targetPath, "mods", "appleskin-fabric-mc1.19-2.4.1.jar"),
-    }).then((res) => {
-      console.log(res);
-      console.log(res as ModFile);
-    });
+  function test() {
+    invoke("test");
+    // invoke("get_belonged_mod_file", {
+    //   path: await join(targetPath, "mods", "appleskin-fabric-mc1.19-2.4.1.jar"),
+    // }).then((res) => {
+    //   console.log(res);
+    //   console.log(res as ModFile);
+    // });
   }
 </script>
 

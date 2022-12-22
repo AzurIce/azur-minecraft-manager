@@ -8,9 +8,6 @@
 mod utils;
 // mod json;
 mod cmd;
-// mod modrinth;
-// mod modloader;
-// mod mcmod;
 mod amcm;
 
 /* LAZY_STATIC */
@@ -24,8 +21,7 @@ lazy_static! {
 }
 
 fn main() {
-    tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![
+    tauri::Builder::default().invoke_handler(tauri::generate_handler![
             cmd::load,
             cmd::target::get_target_list,
             cmd::target::get_target,
@@ -38,6 +34,11 @@ fn main() {
             cmd::mcmod::get_project_from_hash,
             cmd::mcmod::get_version_from_hashes,
             cmd::mcmod::get_project_from_hashes,
+            cmd::mcmod::get_mod_files,
+            cmd::mcmod::update_mod_files,
+            // cmd::mcmod::enter_manage_target,
+            // cmd::mcmod::leave_manage_target,
+            cmd::mcmod::watch_mod_files,
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

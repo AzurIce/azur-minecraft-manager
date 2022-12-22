@@ -20,17 +20,17 @@ impl ModFileBelong {
 }
 
 //----- ModFile -----//
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum BelongState {
     Unknown,
     Modrinth,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ModFile {
-    filename: String,
-    sha1: String,
-    belong_state: BelongState,
+    pub filename: String,
+    pub sha1: String,
+    pub belong_state: BelongState,
 }
 
 impl ModFile {

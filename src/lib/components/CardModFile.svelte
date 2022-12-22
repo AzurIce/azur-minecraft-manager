@@ -13,7 +13,7 @@
     belong_state: BelongState;
   };
   export let targetPath: string;
-  import { onMount } from "svelte";
+  import { afterUpdate, beforeUpdate, onMount } from "svelte";
   import { invoke } from "@tauri-apps/api";
   import { join } from "@tauri-apps/api/path";
 
@@ -28,12 +28,25 @@
     server_side: "",
   };
 
-  onMount(async () => {
-    if (file.belong_state == BelongState.Modrinth) {
-      version = await invoke("get_version_from_hash", { hash: file.sha1 });
-      project = await invoke("get_project_from_hash", { hash: file.sha1 });
+  let prevState = file.belong_state;
+  onMount(() => {
+      getData();
+  })
+
+  afterUpdate(async () => {
+    if (prevState != file.belong_state) {
+      getData();
     }
   });
+
+  async function getData() {
+    if (file.belong_state == BelongState.Modrinth) {
+      version = await invoke("get_version_from_hash", { hash: file.sha1 });
+      // console.log(version);
+      project = await invoke("get_project_from_hash", { hash: file.sha1 });
+      // console.log(project);
+    }
+  }
 </script>
 
 <div

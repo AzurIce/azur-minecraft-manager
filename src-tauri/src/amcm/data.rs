@@ -1,13 +1,20 @@
+use crate::amcm::structures::BelongState;
+use crate::amcm::structures::ModFile;
 use crate::amcm::structures::ModFileBelong;
+use crate::utils::file::get_file_sha1;
+use crate::CORE;
 use ferinth::structures::{project_structs::Project, version_structs::Version};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fs;
+use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Data {
     versions: HashMap<String, Version>,
     projects: HashMap<String, Project>,
     hash_to_mfb: HashMap<String, ModFileBelong>,
+    mod_files: Vec<ModFile>,
 }
 
 impl Data {
@@ -16,6 +23,7 @@ impl Data {
             versions: HashMap::new(),
             projects: HashMap::new(),
             hash_to_mfb: HashMap::new(),
+            mod_files: Vec::new(),
         }
     }
 
@@ -124,5 +132,35 @@ impl Data {
             Err(error) => return Err(error.to_string()),
         }
         Ok(())
+    }
+
+    pub async fn update_mod_files(&mut self, path: String) {
+        println!("update_mod_files: {:#?}", path);
+        let mut mod_file_list: Vec<ModFile> = Vec::new();
+        for entry in fs::read_dir(path).unwrap() {
+            let file_path = entry.unwrap().path();
+            println!("{:#?}", file_path.to_str().unwrap());
+            if file_path.is_file() && file_path.extension().unwrap() == "jar" {
+                let filename = String::from(file_path.file_name().unwrap().to_str().unwrap());
+                let sha1 = get_file_sha1(file_path.to_str().unwrap());
+                let mut belong_state = BelongState::Unknown;
+
+                if let Some(_) = self.get_project_id_from_hash(&sha1) {
+                    belong_state = BelongState::Modrinth;
+                }
+
+                mod_file_list.push(ModFile {
+                    filename,
+                    sha1,
+                    belong_state,
+                });
+            }
+        }
+        println!("{:#?}", mod_file_list);
+        self.mod_files = mod_file_list;
+    }
+
+    pub fn mod_files(&self) -> Vec<ModFile> {
+        self.mod_files.clone()
     }
 }

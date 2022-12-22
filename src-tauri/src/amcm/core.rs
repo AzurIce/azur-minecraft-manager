@@ -1,17 +1,22 @@
-
+use crate::amcm::config::{Config, Target};
+use crate::amcm::data::Data;
+use crate::utils::file::save_str;
+use crate::CORE;
+use std::env::current_exe;
 use std::fs;
 use std::io::{Read, Write};
-use std::env::current_exe;
 use std::path::PathBuf;
-use crate::utils::file::save_str;
-use crate::amcm::data::Data;
-use crate::amcm::config::{Config, Target};
+
+use hotwatch::{Event, Hotwatch};
+// use notify::{Watcher, RecommendedWatcher, RecursiveMode};
+use tauri::Window;
 pub struct Core {
     config: Config,
     data: Data,
     config_dir: PathBuf,
     data_dir: PathBuf,
     // TODO: use hot watch watch the mod dir, and emit events to frontend
+    watcher: Hotwatch,
 }
 
 impl Core {
@@ -29,6 +34,7 @@ impl Core {
                 .parent()
                 .unwrap()
                 .join("amcm-data.json"),
+            watcher: Hotwatch::new().expect("hotwatch failed to initialize!"),
         }
     }
 
@@ -128,4 +134,53 @@ impl Core {
         self.save_data();
         res
     }
+
+    pub async fn watch_mod_files(&mut self, dir: String, window: Window) -> Result<(), String> {
+        
+        self.data.update_mod_files(dir.clone()).await;
+        window.emit("mod_files_updated", self.data.mod_files());
+        let dir1 = dir.clone();
+        window.once("unwatch_mod_files", move |_|{
+            let mut amcm = futures::executor::block_on(async {
+                CORE.lock().await
+            });
+            amcm.watcher.unwatch(dir1.clone());
+        });
+        let dir2 = dir.clone();
+        let dir3 = dir.clone();
+        if let Err(error) = self.watcher.watch(dir2, move |event: Event| {
+            let mut amcm = futures::executor::block_on(async {
+                CORE.lock().await
+            });
+            println!("{:#?}", event);futures::executor::block_on(async {
+                amcm.data().update_mod_files(dir3.clone()).await;
+            });
+            window.emit("mod_files_updated", amcm.data().mod_files());
+        }) {
+            return Err(error.to_string());
+        }
+        Ok(())
+    }
+    // pub async fn update_mod_files(&mut self, path: String) {
+    //     self.data.update_mod_files(path.clone()).await;
+    // }
+    // pub fn watch_target(&mut self, target: Target, window: Window) -> Result<(), String> {
+    //     self.hotwatch.watch(target.location.clone(), move |event: Event| {
+    //         println!("{:#?}", event);
+    //         window.emit("mod-files-changed", ());
+
+    //         // if let Event::Create(path) = event {
+    //         //     println!("create");
+    //         // } else if let Event::Remove(path) = event {
+    //         //     println!("remove");
+    //         // }
+    //     }).expect("failed to watch file!");
+
+    //     Ok(())
+    // }
+
+    // pub fn unwatch_target(&mut self, target: Target) -> Result<(), String> {
+    //     self.hotwatch.unwatch(target.location);
+    //     Ok(())
+    // }
 }
