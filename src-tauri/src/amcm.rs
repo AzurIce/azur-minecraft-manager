@@ -158,6 +158,7 @@ pub struct Core {
     data: Data,
     config_dir: PathBuf,
     data_dir: PathBuf,
+    // TODO: use hot watch watch the mod dir, and emit events to frontend
 }
 
 impl Core {

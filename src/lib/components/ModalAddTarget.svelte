@@ -9,7 +9,7 @@
     Label,
   } from "flowbite-svelte";
   import PathInput from "./PathInput.svelte";
-  import { TargetType, type Target } from "../typing";
+  import { TargetType, type Target } from "../typing/typing";
   import { createEventDispatcher } from "svelte";
 
   const dispatch = createEventDispatcher();

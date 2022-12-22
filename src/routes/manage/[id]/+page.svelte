@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ModFile, Target } from "$lib/typing";
+  import type { ModFile, Target } from "$lib/typing/typing";
   import { Breadcrumb, BreadcrumbItem, Card } from "flowbite-svelte";
   import { Tabs, TabItem, Button } from "flowbite-svelte";
   import { invoke } from "@tauri-apps/api";
@@ -13,15 +13,23 @@
   $: targetPath = data.target.location;
 
   let fileList: Array<any> = [];
-  let versions: Map<string, any> = new Map();
-  let projects: Map<string, any> = new Map();
 
+  import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+  
+  let unlisten: UnlistenFn;
   let loading = true;
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   onMount(async () => {
     await getModFileList();
     loading = false;
+    unlisten = await listen<Array<any>>("mod-list-updated", (event) => {
+      fileList = event.payload;
+    })
   });
+
+  onDestroy(() => {
+    unlisten();
+  })
 
   async function getModFileList() {
     fileList = await invoke<Array<any>>("get_mod_file_list", {
@@ -31,7 +39,7 @@
 
   async function updateData() {
     invoke("update_data_from_hashes", {hashes: fileList.map(file => file.sha1)}).then((res) => {
-      console.log(res);
+      console.log("Updated data from hashes");
     }).catch((err) => {
       console.log(err);
     })
@@ -44,10 +52,6 @@
       console.log(res);
       console.log(res as ModFile);
     });
-    // console.log(await join(targetPath, "mods"));
-    // invoke("get_mod_file_list", {path: await join(targetPath, "mods")}).then((res) => {
-    //   console.log(res);
-    // })
   }
 </script>
 

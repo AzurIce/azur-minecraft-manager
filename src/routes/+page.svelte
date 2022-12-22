@@ -4,7 +4,7 @@
   import ModalAddTarget from "$lib/components/ModalAddTarget.svelte";
   import CardTarget from "$lib/components/CardTarget.svelte";
   import { Button } from "flowbite-svelte";
-  import type { TargetType, Target } from "$lib/typing";
+  import type { TargetType, Target } from "$lib/typing/typing";
 
   let targetList: Target[] = [];
   let modalAddTarget = false;

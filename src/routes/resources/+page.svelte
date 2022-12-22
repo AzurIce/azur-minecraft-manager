@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Target } from "$lib/typing";
+  import type { Target } from "$lib/typing/typing";
   import { Breadcrumb, BreadcrumbItem } from "flowbite-svelte";
   import { Tabs, TabItem, Button } from "flowbite-svelte";
 </script>

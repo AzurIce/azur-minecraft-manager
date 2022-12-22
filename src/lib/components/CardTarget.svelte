@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Card, Button } from "flowbite-svelte";
-  import { type Target, TargetType } from "$lib/typing";
+  import { type Target, TargetType } from "$lib/typing/typing";
   import { goto } from "$app/navigation";
   import { invoke } from "@tauri-apps/api";
   import { createEventDispatcher } from "svelte";
