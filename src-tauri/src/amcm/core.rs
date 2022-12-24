@@ -1,6 +1,6 @@
 use crate::amcm::config::{Config, Target};
 use crate::amcm::data::Data;
-use crate::utils::file::save_str;
+use crate::utils::file::{save_str, is_path_exist};
 use crate::CORE;
 use std::env::current_exe;
 use std::fs;
@@ -13,87 +13,94 @@ use tauri::Window;
 pub struct Core {
     config: Config,
     data: Data,
-    config_dir: PathBuf,
-    data_dir: PathBuf,
-    // TODO: use hot watch watch the mod dir, and emit events to frontend
+
+    amcm_dir: PathBuf,
+    config_path: PathBuf,
+    data_path: PathBuf,
+    storge_dir: PathBuf,
+
     watcher: Hotwatch,
 }
 
 impl Core {
     pub fn default() -> Core {
+        let amcm_dir = current_exe().unwrap().parent().unwrap().join(".amcm/");
         Core {
             config: Config::default(),
             data: Data::default(),
-            config_dir: current_exe()
-                .unwrap()
-                .parent()
-                .unwrap()
-                .join("amcm-config.json"),
-            data_dir: current_exe()
-                .unwrap()
-                .parent()
-                .unwrap()
-                .join("amcm-data.json"),
+            config_path: amcm_dir.join("amcm-config.json"),
+            data_path: amcm_dir.join("amcm-data.json"),
+            storge_dir: amcm_dir.join("storage/"),
+            amcm_dir,
             watcher: Hotwatch::new().expect("hotwatch failed to initialize!"),
         }
     }
 
+    
     pub fn init() -> Core {
         let mut core = Core::default();
-
+        
+        core.init_dir();
+        
         core.load();
-
+        
         core
     }
-
+    
     pub fn load(&mut self) {
         self.load_config();
         self.load_data();
     }
 
-    fn init_data(&mut self) {
+    fn init_dir(&self) {
+        if !is_path_exist(self.amcm_dir.clone()) {
+            fs::create_dir(self.amcm_dir.clone()).expect(".amcm/ create failed");
+        }
+        if !is_path_exist(self.storge_dir.clone()) {
+            fs::create_dir(self.storge_dir.clone()).expect(".amcm/storage/ create failed");
+        }
+    }
+
+    fn init_default_data(&mut self) {
         self.data = Data::default();
-        let mut file = fs::File::create(&self.data_dir).expect("amcm-data.json created failed");
+        let mut file = fs::File::create(&self.data_path).expect("amcm-data.json created failed");
         let json_str = serde_json::to_string(&self.data).unwrap();
         file.write_all(json_str.as_bytes())
             .expect("default data wrote failed")
     }
-    fn init_config(&mut self) {
+    fn init_default_config(&mut self) {
         self.config = Config::default();
-        let mut file = fs::File::create(&self.config_dir).expect("amcm-config.json created failed");
+        let mut file =
+            fs::File::create(&self.config_path).expect("amcm-config.json created failed");
         let json_str = serde_json::to_string(&self.config).unwrap();
         file.write_all(json_str.as_bytes())
             .expect("default config wrote failed")
     }
 
     fn load_data(&mut self) {
-        if let Ok(mut file) = fs::File::open(&self.data_dir) {
+        if let Ok(mut file) = fs::File::open(&self.data_path) {
             let mut json_str = String::new();
             file.read_to_string(&mut json_str)
                 .expect("amcm-data.json read failed");
             if let Ok(data) = serde_json::from_str(&json_str) {
                 self.data = data;
-            } else {
-                self.init_data();
+                return;
             }
-        } else {
-            self.init_data()
         }
+        self.init_default_data();
     }
 
     fn load_config(&mut self) {
-        if let Ok(mut file) = fs::File::open(&self.config_dir) {
+        if let Ok(mut file) = fs::File::open(&self.config_path) {
             let mut json_str = String::new();
             file.read_to_string(&mut json_str)
                 .expect("amcm-config.json read failed");
             if let Ok(config) = serde_json::from_str(&json_str) {
                 self.config = config;
-            } else {
-                self.init_config();
+                return;
             }
-        } else {
-            self.init_config();
         }
+        self.init_default_config();
     }
 
     pub fn config(&mut self) -> &mut Config {
@@ -105,12 +112,12 @@ impl Core {
 
     pub fn save_config(&self) {
         save_str(
-            &self.config_dir,
+            &self.config_path,
             serde_json::to_string(&self.config).unwrap(),
         );
     }
     pub fn save_data(&self) {
-        save_str(&self.data_dir, serde_json::to_string(&self.data).unwrap());
+        save_str(&self.data_path, serde_json::to_string(&self.data).unwrap());
     }
 
     pub fn add_target(&mut self, target: Target) {
@@ -136,29 +143,27 @@ impl Core {
     }
 
     pub async fn watch_mod_files(&mut self, dir: String, window: Window) -> Result<(), String> {
-        
         self.data.update_mod_files(dir.clone()).await;
-        window.emit("mod_files_updated", self.data.mod_files());
-        let dir1 = dir.clone();
-        window.once("unwatch_mod_files", move |_|{
-            let mut amcm = futures::executor::block_on(async {
-                CORE.lock().await
+        window.emit("mod_files_updated", self.data.mod_files()).expect("Event mod_files_updated emit failed");
+
+        let dir_ = dir.clone();
+        let window_ = window.clone();
+        if let Err(error) = self.watcher.watch(dir.clone(), move |event: Event| {
+            let mut amcm = futures::executor::block_on(async { CORE.lock().await });
+            println!("{:#?}", event);
+            futures::executor::block_on(async {
+                amcm.data().update_mod_files(dir_.clone()).await;
             });
-            amcm.watcher.unwatch(dir1.clone());
-        });
-        let dir2 = dir.clone();
-        let dir3 = dir.clone();
-        if let Err(error) = self.watcher.watch(dir2, move |event: Event| {
-            let mut amcm = futures::executor::block_on(async {
-                CORE.lock().await
-            });
-            println!("{:#?}", event);futures::executor::block_on(async {
-                amcm.data().update_mod_files(dir3.clone()).await;
-            });
-            window.emit("mod_files_updated", amcm.data().mod_files());
+            window_.emit("mod_files_updated", amcm.data().mod_files()).expect("Event mod_files_updated emit failed");
         }) {
             return Err(error.to_string());
         }
+        let dir_ = dir.clone();
+        window.once("unwatch_mod_files", |_| {
+            let mut amcm = futures::executor::block_on(async { CORE.lock().await });
+            amcm.watcher.unwatch(dir_).expect("Mod files unwatch failed");
+        });
+
         Ok(())
     }
     // pub async fn update_mod_files(&mut self, path: String) {

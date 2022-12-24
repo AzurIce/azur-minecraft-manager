@@ -30,7 +30,6 @@
     console.log("beforeNavigate");
     unlisten();
     emit("unwatch_mod_files");
-    // invoke("leave_manage_target", { index: index, window: appWindow });
   });
   // Entering
   afterNavigate(async (navigation) => {
@@ -56,8 +55,10 @@
     invoke("update_data_from_hashes", {
       hashes: fileList.map((file) => file.sha1),
     })
-      .then((res) => {
+      .then(async (res) => {
         console.log("Updated data from hashes");
+        await invoke("update_mod_files", {dir: await join(targetPath, "mods")});
+        getModFileList();
       })
       .catch((err) => {
         console.log(err);

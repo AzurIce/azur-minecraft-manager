@@ -7,7 +7,7 @@
 <div>
   <Button
     on:click={() => {
-      invoke("reload");
+      invoke("load");
     }}
   >
     Reload

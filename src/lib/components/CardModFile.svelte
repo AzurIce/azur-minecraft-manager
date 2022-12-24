@@ -13,9 +13,10 @@
     belong_state: BelongState;
   };
   export let targetPath: string;
-  import { afterUpdate, beforeUpdate, onMount } from "svelte";
+  import { afterUpdate, beforeUpdate, onDestroy, onMount } from "svelte";
   import { invoke } from "@tauri-apps/api";
   import { join } from "@tauri-apps/api/path";
+    import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 
   let version: any = {
     game_versions: [],
@@ -29,7 +30,7 @@
   };
 
   let prevState = file.belong_state;
-  onMount(() => {
+  onMount(async () => {
       getData();
   })
 

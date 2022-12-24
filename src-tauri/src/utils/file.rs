@@ -4,11 +4,11 @@ use std::{fs::{self, File}, io::{Read, Write}};
 use std::path::Path;
 
 #[tauri::command]
-pub fn is_path_exist(path: &str) -> bool {
+pub fn is_path_exist<P: AsRef<Path>>(path: P) -> bool {
     return fs::try_exists(path).unwrap_or(false);
 }
 
-pub fn get_file_sha1(path: &str) -> String {
+pub fn get_file_sha1<P: AsRef<Path>>(path: P) -> String {
     let bytes = fs::read(path).unwrap();
     Sha1::default().digest(&bytes[..]).to_hex()
 }
