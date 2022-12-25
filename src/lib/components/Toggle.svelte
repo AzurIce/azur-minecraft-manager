@@ -4,10 +4,7 @@
 
 <button
   class="flex items-center cursor-pointer relative mb-4"
-  on:click={() => {
-    console.log(checked);
-    checked = !checked;
-  }}
+  on:click
 >
   <div
     class="{checked

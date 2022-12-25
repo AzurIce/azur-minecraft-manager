@@ -143,18 +143,33 @@ impl Core {
     }
 
     pub async fn watch_mod_files(&mut self, dir: String, window: Window) -> Result<(), String> {
+        // TODO: Optimize it
         self.data.update_mod_files(dir.clone()).await;
         window.emit("mod_files_updated", self.data.mod_files()).expect("Event mod_files_updated emit failed");
 
         let dir_ = dir.clone();
         let window_ = window.clone();
         if let Err(error) = self.watcher.watch(dir.clone(), move |event: Event| {
+            println!("###### Event handle start #####");
             let mut amcm = futures::executor::block_on(async { CORE.lock().await });
+
+            let time_start = std::time::Instant::now();
             println!("{:#?}", event);
-            futures::executor::block_on(async {
-                amcm.data().update_mod_files(dir_.clone()).await;
-            });
+            if let Event::Create(filepath)= event {
+                amcm.data().update_mod_file(String::from(filepath.to_str().unwrap()));
+            } else if let Event::Rename(srcpath, dstpath) = event {
+                amcm.data().update_mod_file(String::from(dstpath.to_str().unwrap()));
+            } else if let Event::Remove(filepath) = event {
+                amcm.data().remove_mod_file_from_filepath(String::from(filepath.to_str().unwrap()));
+            } else {
+                println!("###### Event handle end #####");
+                return;
+            }
+            println!("Event handle cost: {:#?}", time_start.elapsed());
+            let time_start = std::time::Instant::now();
             window_.emit("mod_files_updated", amcm.data().mod_files()).expect("Event mod_files_updated emit failed");
+            println!("Emit cost: {:#?}", time_start.elapsed());
+            println!("###### Event handle end #####");
         }) {
             return Err(error.to_string());
         }
@@ -166,26 +181,4 @@ impl Core {
 
         Ok(())
     }
-    // pub async fn update_mod_files(&mut self, path: String) {
-    //     self.data.update_mod_files(path.clone()).await;
-    // }
-    // pub fn watch_target(&mut self, target: Target, window: Window) -> Result<(), String> {
-    //     self.hotwatch.watch(target.location.clone(), move |event: Event| {
-    //         println!("{:#?}", event);
-    //         window.emit("mod-files-changed", ());
-
-    //         // if let Event::Create(path) = event {
-    //         //     println!("create");
-    //         // } else if let Event::Remove(path) = event {
-    //         //     println!("remove");
-    //         // }
-    //     }).expect("failed to watch file!");
-
-    //     Ok(())
-    // }
-
-    // pub fn unwatch_target(&mut self, target: Target) -> Result<(), String> {
-    //     self.hotwatch.unwatch(target.location);
-    //     Ok(())
-    // }
 }

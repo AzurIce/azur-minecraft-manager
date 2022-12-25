@@ -1,4 +1,4 @@
-use crate::utils::file::get_file_sha1;
+use crate::utils::file::{get_file_sha1, self};
 use crate::CORE;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -28,6 +28,7 @@ pub enum BelongState {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ModFile {
+    pub path: String,
     pub filename: String,
     pub enabled: bool,
     pub sha1: String,
@@ -37,6 +38,7 @@ pub struct ModFile {
 impl ModFile {
     pub fn default() -> ModFile {
         ModFile {
+            path: String::from(""),
             filename: String::from(""),
             sha1: String::from(""),
             enabled: true,
@@ -55,10 +57,35 @@ impl ModFile {
         }
 
         ModFile {
+            path: String::from(path.to_str().unwrap()),
             filename,
             sha1,
             enabled,
             belong_state,
+        }
+    }
+
+    pub fn set_enabled(&self, enabled: bool) -> Result<(), String>{
+        use std::fs;
+        use std::time::Instant;
+        let src = self.path.clone();
+        let dst;
+        if !(self.enabled ^ enabled) {
+            return Ok(())
+        }
+        if self.enabled {
+            dst = String::from(self.path.clone() + ".disabled");
+        } else {
+            dst = String::from(&self.path[..&self.path.len()-9]);
+            println!("{:#?}", dst);
+        }
+        let time_start = Instant::now();
+        if let Err(error) = fs::rename(src, dst) {
+            Err(error.to_string())
+        } else {
+            let time_cost = time_start.elapsed();
+            println!("Rename cost: {:#?}", time_cost);
+            Ok(())
         }
     }
 }

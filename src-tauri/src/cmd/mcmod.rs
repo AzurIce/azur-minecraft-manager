@@ -79,3 +79,12 @@ pub async fn target_watch_mod_files(index: usize, window: Window) -> Result<(), 
     let dir = Path::new(&target.location).join("mods/");
     amcm.watch_mod_files(String::from(dir.to_str().unwrap()), window).await
 }
+
+#[tauri::command]
+pub async fn set_mod_file_enabled(hash: String, enabled: bool) -> Result<(), String> {
+    if let Some(mod_file) = CORE.lock().await.data().get_mod_file_from_hash(hash) {
+        mod_file.set_enabled(enabled)
+    } else {
+        Err(String::from("Not found"))
+    }
+}

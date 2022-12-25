@@ -6,6 +6,7 @@ use ferinth::structures::{project::Project, version::Version};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
+use std::path::Path;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Data {
     versions: HashMap<String, Version>,
@@ -131,35 +132,117 @@ impl Data {
         Ok(())
     }
 
+    pub fn mod_file_of(&self, path: String) -> Option<ModFile> {
+        let path = Path::new(&path);
+
+        if path.is_file() && path.extension().unwrap() == "jar" || path.extension().unwrap() == "disabled" {
+            let filename = String::from(path.file_name().unwrap().to_str().unwrap());
+            let sha1 = get_file_sha1(path.to_str().unwrap());
+            let enabled = path.extension().unwrap() == "jar";
+            let mut belong_state = BelongState::Unknown;
+
+            if let Some(_) = self.get_project_id_from_hash(&sha1) {
+                belong_state = BelongState::Modrinth;
+            }
+
+            Some(ModFile {
+                path: String::from(path.to_str().unwrap()),
+                filename,
+                sha1,
+                enabled,
+                belong_state,
+            })
+        } else {
+            None
+        }
+    }
+
     pub async fn update_mod_files(&mut self, path: String) {
         println!("update_mod_files: {:#?}", path);
         let mut mod_file_list: Vec<ModFile> = Vec::new();
         for entry in fs::read_dir(path).unwrap() {
             let file_path = entry.unwrap().path();
             println!("{:#?}", file_path.to_str().unwrap());
-            if file_path.is_file() && file_path.extension().unwrap() == "jar" || file_path.extension().unwrap() == "disabled" {
-                let filename = String::from(file_path.file_name().unwrap().to_str().unwrap());
-                let sha1 = get_file_sha1(file_path.to_str().unwrap());
-                let enabled = file_path.extension().unwrap() == "jar";
-                let mut belong_state = BelongState::Unknown;
-
-                if let Some(_) = self.get_project_id_from_hash(&sha1) {
-                    belong_state = BelongState::Modrinth;
-                }
-
-                mod_file_list.push(ModFile {
-                    filename,
-                    sha1,
-                    enabled,
-                    belong_state,
-                });
+            if let Some(mod_file) = self.mod_file_of(String::from(file_path.to_str().unwrap())) {
+                mod_file_list.push(mod_file);
             }
+            // if file_path.is_file() && file_path.extension().unwrap() == "jar" || file_path.extension().unwrap() == "disabled" {
+            //     let filename = String::from(file_path.file_name().unwrap().to_str().unwrap());
+            //     let sha1 = get_file_sha1(file_path.to_str().unwrap());
+            //     let enabled = file_path.extension().unwrap() == "jar";
+            //     let mut belong_state = BelongState::Unknown;
+
+            //     if let Some(_) = self.get_project_id_from_hash(&sha1) {
+            //         belong_state = BelongState::Modrinth;
+            //     }
+
+            //     mod_file_list.push(ModFile {
+            //         path: String::from(file_path.to_str().unwrap()),
+            //         filename,
+            //         sha1,
+            //         enabled,
+            //         belong_state,
+            //     });
+            // }
         }
         println!("{:#?}", mod_file_list);
         self.mod_files = mod_file_list;
     }
 
+    pub fn update_mod_file(&mut self, path: String) {
+        println!("-> data.rs/update_mod_file");
+        use std::time::Instant;
+        let time_start = Instant::now();
+        let sha1 = get_file_sha1(&path);
+        println!("   Get file sha1 cost: {:#?}", time_start.elapsed());
+        let time_start = Instant::now();
+        if let Some(new_mod_file) = self.mod_file_of(path) {
+            println!("   mod_file_of cost: {:#?}", time_start.elapsed());
+            let time_start = Instant::now();
+            for mod_file in &mut self.mod_files {
+                if mod_file.sha1 == sha1 {
+                    println!("   Find mod_file cost: {:#?}", time_start.elapsed());
+                    let time_start = Instant::now();
+                    *mod_file = new_mod_file;
+                    println!("   Assign mod_file cost: {:#?}", time_start.elapsed());
+                    println!("<- data.rs/update_mod_file");
+                    return;
+                }
+            }
+            self.mod_files.push(new_mod_file);
+        }
+        println!("<- data.rs/update_mod_file");
+    }
+
+    pub fn remove_mod_file_from_filepath(&mut self, path: String) {
+        let path = Path::new(&path);
+        for (index, mod_file) in self.mod_files.iter().enumerate() {
+            if Path::new(&mod_file.path) == path {
+                self.mod_files.remove(index);
+                return;
+            }
+        }
+    }
+
     pub fn mod_files(&self) -> Vec<ModFile> {
         self.mod_files.clone()
     }
+
+    pub fn get_mod_file_from_hash(&self, hash: String) -> Option<ModFile> {
+        for mod_file in &self.mod_files {
+            if mod_file.sha1 == hash {
+                return Some((*mod_file).clone());
+            }
+        }
+        None
+    }
+
+    // pub fn get_mod_file_from_filename(&self, filename: String) -> Option<ModFile> {
+    //     for mod_file in &self.mod_files {
+    //         if mod_file.filename == filename {
+    //             return Some((*mod_file).clone());
+    //         }
+    //     }
+    //     None
+    // }
 }

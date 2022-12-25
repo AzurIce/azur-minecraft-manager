@@ -58,10 +58,13 @@
     }
     // console.log("<- getData()")
   }
-
 </script>
 
-<div class="p-3 flex items-center {file.enabled ? "bg-white" : "bg-gray-50"} rounded-md shadow-sm border">
+<div
+  class="p-3 flex items-center {file.enabled
+    ? 'bg-white'
+    : 'bg-gray-50'} rounded-md shadow-sm border"
+>
   <div class="flex flex-col gap-1 flex-1">
     <div class="flex items-center gap-2">
       {#if file.belong_state == BelongState.Modrinth}
@@ -117,7 +120,15 @@
   </div>
   <div class="w-20 flex-none flex flex-col items-center">
     <!-- <Toggle checked={true}></Toggle> -->
-    <Toggle checked={file.enabled}/>
+    <Toggle
+      checked={file.enabled}
+      on:click={() => {
+        invoke("set_mod_file_enabled", {hash: file.sha1, enabled : !file.enabled}).catch((err) => {
+          console.error(err);
+        })
+        console.log("clicked");
+      }}
+    />
     <!-- // TODO: create my own toggle -->
     <!-- <input
       id="enableToggle"

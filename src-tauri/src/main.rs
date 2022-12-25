@@ -38,6 +38,7 @@ fn main() {
             cmd::mcmod::get_project_from_hashes,
             cmd::mcmod::get_mod_files,
             cmd::mcmod::update_mod_files,
+            cmd::mcmod::set_mod_file_enabled,
             // cmd::mcmod::enter_manage_target,
             // cmd::mcmod::leave_manage_target,
             cmd::mcmod::watch_mod_files,
