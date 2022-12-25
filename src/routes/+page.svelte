@@ -5,6 +5,7 @@
   import CardTarget from "$lib/components/CardTarget.svelte";
   import { Button } from "flowbite-svelte";
   import type { TargetType, Target } from "$lib/typing/typing";
+    import Toggle from "$lib/components/Toggle.svelte";
 
   let targetList: Target[] = [];
   let modalAddTarget = false;
@@ -59,6 +60,7 @@
       </Button>
     </div>
   {/if}
+  <Toggle/>
 </div>
 <ModalAddTarget bind:show={modalAddTarget} on:added={onUpdateTargets} />
 

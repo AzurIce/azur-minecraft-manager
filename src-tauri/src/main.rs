@@ -9,6 +9,8 @@ mod utils;
 // mod json;
 mod cmd;
 mod amcm;
+#[cfg(test)]
+mod test;
 
 /* LAZY_STATIC */
 use tokio::sync::Mutex;
@@ -39,6 +41,7 @@ fn main() {
             // cmd::mcmod::enter_manage_target,
             // cmd::mcmod::leave_manage_target,
             cmd::mcmod::watch_mod_files,
+            cmd::mcmod::target_watch_mod_files,
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

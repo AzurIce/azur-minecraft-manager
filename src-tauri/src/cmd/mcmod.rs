@@ -1,11 +1,9 @@
 use crate::amcm::structures::ModFile;
-use crate::utils::file::get_file_sha1;
 use crate::CORE;
-use ferinth::structures::{project_structs::Project, version_structs::Version};
-use notify::recommended_watcher;
+use ferinth::structures::{project::Project, version::Version};
 use std::collections::HashMap;
 use std::fs;
-use std::path::PathBuf;
+use std::path::Path;
 use tauri::Window;
 
 #[tauri::command]
@@ -26,10 +24,8 @@ pub async fn get_mod_file_list(path: String) -> Vec<ModFile> {
 }
 
 #[tauri::command]
-pub async fn update_data_from_hashes(hashes: Vec<String>, window: Window) -> Result<(), String> {
-    let res = CORE.lock().await.update_data_from_hashes(hashes).await;
-    window.emit("data_updated", "");
-    res
+pub async fn update_data_from_hashes(hashes: Vec<String>) -> Result<(), String> {
+    CORE.lock().await.update_data_from_hashes(hashes).await
 }
 
 #[tauri::command]
@@ -73,4 +69,13 @@ pub async fn update_mod_files(dir: String) {
 #[tauri::command]
 pub async fn watch_mod_files(dir: String, window: Window) -> Result<(), String> {
     CORE.lock().await.watch_mod_files(dir, window).await
+}
+
+#[tauri::command]
+pub async fn target_watch_mod_files(index: usize, window: Window) -> Result<(), String> {
+    let mut amcm = CORE.lock().await;
+
+    let target = amcm.config().get_target(index)?;
+    let dir = Path::new(&target.location).join("mods/");
+    amcm.watch_mod_files(String::from(dir.to_str().unwrap()), window).await
 }

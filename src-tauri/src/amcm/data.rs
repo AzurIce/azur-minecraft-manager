@@ -2,13 +2,10 @@ use crate::amcm::structures::BelongState;
 use crate::amcm::structures::ModFile;
 use crate::amcm::structures::ModFileBelong;
 use crate::utils::file::get_file_sha1;
-use crate::CORE;
-use ferinth::structures::{project_structs::Project, version_structs::Version};
+use ferinth::structures::{project::Project, version::Version};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
-use std::path::PathBuf;
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Data {
     versions: HashMap<String, Version>,
@@ -140,9 +137,10 @@ impl Data {
         for entry in fs::read_dir(path).unwrap() {
             let file_path = entry.unwrap().path();
             println!("{:#?}", file_path.to_str().unwrap());
-            if file_path.is_file() && file_path.extension().unwrap() == "jar" {
+            if file_path.is_file() && file_path.extension().unwrap() == "jar" || file_path.extension().unwrap() == "disabled" {
                 let filename = String::from(file_path.file_name().unwrap().to_str().unwrap());
                 let sha1 = get_file_sha1(file_path.to_str().unwrap());
+                let enabled = file_path.extension().unwrap() == "jar";
                 let mut belong_state = BelongState::Unknown;
 
                 if let Some(_) = self.get_project_id_from_hash(&sha1) {
@@ -152,6 +150,7 @@ impl Data {
                 mod_file_list.push(ModFile {
                     filename,
                     sha1,
+                    enabled,
                     belong_state,
                 });
             }

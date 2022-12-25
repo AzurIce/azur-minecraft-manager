@@ -29,6 +29,7 @@ pub enum BelongState {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ModFile {
     pub filename: String,
+    pub enabled: bool,
     pub sha1: String,
     pub belong_state: BelongState,
 }
@@ -38,6 +39,7 @@ impl ModFile {
         ModFile {
             filename: String::from(""),
             sha1: String::from(""),
+            enabled: true,
             belong_state: BelongState::Unknown,
         }
     }
@@ -45,6 +47,7 @@ impl ModFile {
     pub async fn of(path: &PathBuf) -> ModFile {
         let filename = String::from(path.file_name().unwrap().to_str().unwrap());
         let sha1 = get_file_sha1(path.to_str().unwrap());
+        let enabled = path.extension().unwrap() == "jar";
         let mut belong_state = BelongState::Unknown;
 
         if let Some(_) = CORE.lock().await.data().get_project_id_from_hash(&sha1) {
@@ -54,6 +57,7 @@ impl ModFile {
         ModFile {
             filename,
             sha1,
+            enabled,
             belong_state,
         }
     }

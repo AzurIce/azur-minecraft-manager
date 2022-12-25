@@ -19,7 +19,7 @@
   };
 </script>
 
-<div class="flex flex-row h-full items-stretch">
+<div class="absolute inset-0 flex flex-row h-full items-stretch overflow-hidden">
   <Sidebar asideClass="w-64 shrink-0">
     <SidebarWrapper
       divClass="h-full overflow-y-auto py-4 px-3 bg-white rounded dark:bg-gray-800 border-r"

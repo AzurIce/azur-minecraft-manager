@@ -5,6 +5,8 @@
   import { invoke } from "@tauri-apps/api";
   import { createEventDispatcher } from "svelte";
 
+  import { targetIndex } from "$lib/stores";
+
   const dispatch = createEventDispatcher();
 
   export let target: Target;
@@ -29,14 +31,25 @@
     {targetPath}
   </div>
   <div class="flex gap-2">
-    <Button class="w-fit" on:click={() => {goto(`/manage/${id}`)}}>
+    <Button
+      class="w-fit"
+      on:click={() => {
+        targetIndex.update(() => id);
+        goto(`/manage`);
+      }}
+    >
       管理
     </Button>
-    <Button class="w-fit" color="red" outline on:click={() => {
-      invoke("del_target", {index: id}).then((res) => {
-        dispatch('deleted', {targets: res});
-      })
-    }}>
+    <Button
+      class="w-fit"
+      color="red"
+      outline
+      on:click={() => {
+        invoke("del_target", { index: id }).then((res) => {
+          dispatch("deleted", { targets: res });
+        });
+      }}
+    >
       删除
     </Button>
   </div>
