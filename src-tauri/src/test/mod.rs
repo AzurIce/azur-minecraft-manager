@@ -93,6 +93,7 @@ fn modfile_of(path: &PathBuf) -> ModFile {
 
     ModFile {
         filename,
+        path: String::from(path.to_str().unwrap()),
         sha1,
         enabled,
         belong_state,
