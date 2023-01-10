@@ -7,7 +7,7 @@ export enum TargetType {
 export interface Target {
     kind: TargetType;
     location: string;
-    mod_sources: ModFile[]
+    mod_sources: any[]
 }
 
 export enum ModLoader {

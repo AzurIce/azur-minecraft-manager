@@ -12,3 +12,11 @@ export async function getVersionsFromHashes(hashes: Array<string>) {
 export async function getVersionsFromHash(hash: string) {
     return await invoke<any>("get_version_from_hash", {hash: hash});
 }
+
+export async function enableModFile(hash: string) {
+    return await invoke("enable_mod_file", {hash: hash});
+}
+
+export async function disableModFile(hash: string) {
+    return await invoke("disable_mod_file", {hash: hash});
+}

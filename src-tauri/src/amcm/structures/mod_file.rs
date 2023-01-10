@@ -44,20 +44,16 @@ impl ModFile {
         }
     }
 
-    pub fn set_enabled(&self, enabled: bool) -> Result<(), String>{
+    pub fn enable(&self) -> Result<(), String> {
         use std::fs;
         use std::time::Instant;
-        let src = self.path.clone();
-        let dst;
-        if !(self.enabled ^ enabled) {
+        if (self.enabled == true) {
             return Ok(())
         }
-        if self.enabled {
-            dst = String::from(self.path.clone() + ".disabled");
-        } else {
-            dst = String::from(&self.path[..&self.path.len()-9]);
-            println!("{:#?}", dst);
-        }
+
+        let src = self.path.clone();
+        let dst = String::from(&self.path[..&self.path.len()-9]);
+
         let time_start = Instant::now();
         if let Err(error) = fs::rename(src, dst) {
             Err(error.to_string())
@@ -67,4 +63,49 @@ impl ModFile {
             Ok(())
         }
     }
+
+    pub fn disable(&self) -> Result<(), String> {
+        use std::fs;
+        use std::time::Instant;
+
+        if (self.enabled == false) {
+            return Ok(())
+        }
+
+        let src = self.path.clone();
+        let dst= String::from(self.path.clone() + ".disabled");
+
+        let time_start = Instant::now();
+        if let Err(error) = fs::rename(src, dst) {
+            Err(error.to_string())
+        } else {
+            let time_cost = time_start.elapsed();
+            println!("Rename cost: {:#?}", time_cost);
+            Ok(())
+        }
+    }
+
+    // pub fn set_enabled(&self, enabled: bool) -> Result<(), String>{
+    //     use std::fs;
+    //     use std::time::Instant;
+    //     let src = self.path.clone();
+    //     let dst;
+    //     if !(self.enabled ^ enabled) {
+    //         return Ok(())
+    //     }
+    //     if self.enabled {
+    //         dst = String::from(self.path.clone() + ".disabled");
+    //     } else {
+    //         dst = String::from(&self.path[..&self.path.len()-9]);
+    //         println!("{:#?}", dst);
+    //     }
+    //     let time_start = Instant::now();
+    //     if let Err(error) = fs::rename(src, dst) {
+    //         Err(error.to_string())
+    //     } else {
+    //         let time_cost = time_start.elapsed();
+    //         println!("Rename cost: {:#?}", time_cost);
+    //         Ok(())
+    //     }
+    // }
 }

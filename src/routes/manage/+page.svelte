@@ -12,7 +12,7 @@
   let target: Target = {
     kind: TargetType.Local,
     location: "",
-    mod_sources: [],
+    mod_sources: new Array(),
   };
   $: targetType = target.kind;
   $: targetPath = target.location;
@@ -30,6 +30,7 @@
 
     console.log("    getting target...");
     target = await invoke("get_target", { index: index });
+    console.log(target.mod_sources);
 
     console.log("    getting localModFiles...");
     localModFiles = await invoke("update_local_mod_files", { dir: await join(target.location, "mods") });
@@ -55,28 +56,6 @@
 
   let loading = true;
   import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
-  // Leaving
-  beforeNavigate((navigation) => {
-    // console.log("-> beforeNavigate");
-  });
-  // Entering
-  afterNavigate(async (navigation) => {
-    // console.log("-> afterNavigate");
-    // await getLocalModFiles();
-    // loading = false;
-    // unlisten = await listen<Array<any>>("mod_files_updated", (event) => {
-    //   console.log("mod_files_updated");
-    //   localModFiles = event.payload;
-    // });
-
-    // invoke("target_watch_mod_files", { index: index });
-  });
-
-  
-
-  // function getVersionFromHash(hash: string): any {
-  //   return versions.get(hash);
-  // }
 
   function test() {
     invoke("test");
@@ -89,13 +68,14 @@
   }
 
   enum Tab {
-    Mod = "Mod",
-    Settings = "Settings",
-    Users = "Users",
-    Dashboard = "Dashboard",
+    RemoteMod = "远端 Mod",
+    LocalMod = "本地 Mod",
+    // Settings = "Settings",
+    // Users = "Users",
+    // Dashboard = "Dashboard",
   }
 
-  let selectedTab = Tab.Mod;
+  let selectedTab = Tab.RemoteMod;
   $: tabs = Object.values(Tab);
 
   // console.log(Object.keys(Tab));
@@ -131,7 +111,25 @@
   </Tabs>
 
   <!-- Tab Contents -->
-  {#if selectedTab == Tab.Mod}
+  {#if selectedTab == Tab.RemoteMod}
+    <div class="w-full bg-white border rounded-md p-2">
+      <!-- {#if updatingData}
+        <Button disabled>
+          <Spinner class="mr-3" size="4" />更新 Modrinth 信息
+        </Button>
+      {:else} -->
+        <!-- <Button on:click={() => {}}>更新 Modrinth 信息</Button> -->
+      <!-- {/if} -->
+    </div>
+    <div class="w-full overflow-y-auto flex flex-col gap-1">
+      <!-- {#if loading}Loading...{:else} -->
+        {#each target.mod_sources as mod_source}
+          {mod_source}
+          <!-- <LocalModFileCard {file} /> -->
+        {/each}
+      <!-- {/if} -->
+    </div>
+  {:else if selectedTab == Tab.LocalMod}
     <div class="w-full bg-white border rounded-md p-2">
       <!-- {#if updatingData}
         <Button disabled>
@@ -148,11 +146,11 @@
         {/each}
       <!-- {/if} -->
     </div>
-  {:else if selectedTab == Tab.Settings}
+  <!-- {:else if selectedTab == Tab.Settings}
     {selectedTab}
   {:else if selectedTab == Tab.Users}
     {selectedTab}
   {:else if selectedTab == Tab.Dashboard}
-    {selectedTab}
+    {selectedTab} -->
   {/if}
 </div>

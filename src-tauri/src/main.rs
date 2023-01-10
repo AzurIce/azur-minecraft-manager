@@ -29,7 +29,7 @@ fn main() {
             cmd::target::add_target,
             cmd::target::del_target,
             cmd::mcmod::get_local_mod_files,
-            
+
             cmd::mcmod::get_version_from_hash,
             cmd::mcmod::get_versions_from_hashes,
             // cmd::mcmod::update_data_from_hashes,
@@ -39,7 +39,9 @@ fn main() {
             // cmd::mcmod::get_project_from_hashes,
             // cmd::mcmod::get_mod_files,
             cmd::mcmod::update_local_mod_files,
-            cmd::mcmod::set_mod_file_enabled,
+            // cmd::mcmod::set_mod_file_enabled,
+            cmd::mcmod::enable_mod_file,
+            cmd::mcmod::disable_mod_file,
             // cmd::mcmod::enter_manage_target,
             // cmd::mcmod::leave_manage_target,
             cmd::mcmod::watch_mod_files,

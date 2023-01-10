@@ -58,9 +58,10 @@ pub async fn get_local_mod_files() -> Vec<ModFile> {
 
 #[tauri::command]
 pub async fn get_version_from_hash(hash: String) -> Result<Version, String> {
+    let cache = CACHE.lock().await;
     println!("\n-> amcm/cmd/mcmod.rs/get_version_from_hash");
     let time_start = std::time::Instant::now();
-    let res = match CACHE.lock().await.get_version_from_hash(&hash).await {
+    let res = match cache.get_version_from_hash(&hash).await {
         Ok(version) => Ok(version),
         Err(err) => Err(format!("{}", err)),
     };
@@ -71,11 +72,11 @@ pub async fn get_version_from_hash(hash: String) -> Result<Version, String> {
 
 #[tauri::command]
 pub async fn get_versions_from_hashes(hashes: Vec<String>) -> HashMap<String, Version> {
-    println!("\n-> amcm/cmd/mcmod.rs/get_versions_from_hashes");
+    // println!("\n-> amcm/cmd/mcmod.rs/get_versions_from_hashes");
     let time_start = std::time::Instant::now();
     let res = CACHE.lock().await.get_versions_from_hashes(hashes).await;
-    println!("   total cost: {:#?}", time_start.elapsed());
-    println!("<- amcm/cmd/mcmod.rs/get_versions_from_hashes\n");
+    // println!("   total cost: {:#?}", time_start.elapsed());
+    // println!("<- amcm/cmd/mcmod.rs/get_versions_from_hashes\n");
     res
 }
 
@@ -116,10 +117,28 @@ pub async fn target_watch_mod_files(index: usize, window: Window) -> Result<(), 
     res
 }
 
+// #[tauri::command]
+// pub async fn set_mod_file_enabled(hash: String, enabled: bool) -> Result<(), String> {
+//     if let Some(mod_file) = CORE.lock().await.data().get_mod_file_from_hash(hash) {
+//         mod_file.set_enabled(enabled)
+//     } else {
+//         Err(String::from("Not found"))
+//     }
+// }
+
 #[tauri::command]
-pub async fn set_mod_file_enabled(hash: String, enabled: bool) -> Result<(), String> {
+pub async fn enable_mod_file(hash: String) -> Result<(), String> {
     if let Some(mod_file) = CORE.lock().await.data().get_mod_file_from_hash(hash) {
-        mod_file.set_enabled(enabled)
+        mod_file.enable()
+    } else {
+        Err(String::from("Not found"))
+    }
+}
+
+#[tauri::command]
+pub async fn disable_mod_file(hash: String) -> Result<(), String> {
+    if let Some(mod_file) = CORE.lock().await.data().get_mod_file_from_hash(hash) {
+        mod_file.disable()
     } else {
         Err(String::from("Not found"))
     }
