@@ -1,7 +1,7 @@
 pub mod target;
 pub mod mcmod;
 
-use crate::CORE;
+use crate::amcm::core::CORE;
 
 #[tauri::command]
 pub async fn load() {

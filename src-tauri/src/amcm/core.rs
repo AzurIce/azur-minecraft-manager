@@ -1,12 +1,20 @@
-use crate::amcm::config::{Config, Target};
+use crate::amcm::config::Config;
+use crate::amcm::target::Target;
 use crate::amcm::data::Data;
-use crate::utils::file::{is_path_exist, save_str};
-use crate::CORE;
+use crate::utils::file::{is_path_exist, write_str};
+// use crate::CORE;
 use std::env::current_exe;
 use std::fs;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::time::Instant;
+use super::AMCM_DIR;
+use super::cache::Cache;
+
+use tokio::sync::Mutex;
+lazy_static! {
+    pub static ref CORE: Mutex<Core> = Mutex::new(Core::init());
+}
 
 use notify::{recommended_watcher, RecommendedWatcher, RecursiveMode, Watcher};
 use tauri::Window;
@@ -14,7 +22,6 @@ pub struct Core {
     config: Config,
     data: Data,
 
-    amcm_dir: PathBuf,
     config_path: PathBuf,
     data_path: PathBuf,
     storge_dir: PathBuf,
@@ -24,14 +31,12 @@ pub struct Core {
 
 impl Core {
     pub fn default() -> Core {
-        let amcm_dir = current_exe().unwrap().parent().unwrap().join(".amcm/");
         Core {
             config: Config::default(),
             data: Data::default(),
-            config_path: amcm_dir.join("amcm-config.json"),
-            data_path: amcm_dir.join("amcm-data.json"),
-            storge_dir: amcm_dir.join("storage/"),
-            amcm_dir,
+            config_path: AMCM_DIR.join("amcm-config.json"),
+            data_path: AMCM_DIR.join("amcm-data.json"),
+            storge_dir: AMCM_DIR.join("storage/"),
             notify_watcher: None,
         }
     }
@@ -52,8 +57,8 @@ impl Core {
     }
 
     fn init_dir(&self) {
-        if !is_path_exist(self.amcm_dir.clone()) {
-            fs::create_dir(self.amcm_dir.clone()).expect(".amcm/ create failed");
+        if !is_path_exist(AMCM_DIR.as_path()) {
+            fs::create_dir(AMCM_DIR.as_path()).expect(".amcm/ create failed");
         }
         if !is_path_exist(self.storge_dir.clone()) {
             fs::create_dir(self.storge_dir.clone()).expect(".amcm/storage/ create failed");
@@ -110,13 +115,13 @@ impl Core {
     }
 
     pub fn save_config(&self) {
-        save_str(
+        write_str(
             &self.config_path,
-            serde_json::to_string(&self.config).unwrap(),
-        );
+            &serde_json::to_string(&self.config).unwrap(),
+        ).expect("save config failed");
     }
     pub fn save_data(&self) {
-        save_str(&self.data_path, serde_json::to_string(&self.data).unwrap());
+        write_str(&self.data_path, &serde_json::to_string(&self.data).unwrap()).expect("save data failed");
     }
 
     pub fn add_target(&mut self, target: Target) {
@@ -129,17 +134,17 @@ impl Core {
         self.save_config();
     }
 
-    pub async fn update_data_from_hash(&mut self, hash: String) -> Result<(), String> {
-        let res = self.data.update_data_from_hash(hash).await;
-        self.save_data();
-        res
-    }
+    // pub async fn update_data_from_hash(&mut self, hash: String) -> Result<(), String> {
+    //     let res = self.data.update_data_from_hash(hash).await;
+    //     self.save_data();
+    //     res
+    // }
 
-    pub async fn update_data_from_hashes(&mut self, hashes: Vec<String>) -> Result<(), String> {
-        let res = self.data.update_data_from_hashes(hashes).await;
-        self.save_data();
-        res
-    }
+    // pub async fn update_data_from_hashes(&mut self, hashes: Vec<String>) -> Result<(), String> {
+    //     let res = self.data.update_data_from_hashes(hashes).await;
+    //     self.save_data();
+    //     res
+    // }
 
     fn notify_event_handler(res: notify::Result<notify::Event>, window: Window) {
         use notify::{
@@ -163,25 +168,25 @@ impl Core {
                 if let EventKind::Create(create_kind) = kind {
                     if let CreateKind::File = create_kind {
                         amcm.data()
-                            .update_mod_file(String::from(path.to_str().unwrap()));
+                            .update_local_mod_file(String::from(path.to_str().unwrap()));
                     } else if let CreateKind::Any = create_kind {
                         amcm.data()
-                            .update_mod_file(String::from(path.to_str().unwrap()));
+                            .update_local_mod_file(String::from(path.to_str().unwrap()));
                     }
                 } else if let EventKind::Modify(modify_kind) = kind {
                     if let ModifyKind::Name(rename_mode) = modify_kind {
                         if let RenameMode::To = rename_mode {
                             amcm.data()
-                                .update_mod_file(String::from(path.to_str().unwrap()));
+                                .update_local_mod_file(String::from(path.to_str().unwrap()));
                         }
                     }
                 } else if let EventKind::Remove(remove_kind) = kind {
                     if let RemoveKind::File = remove_kind {
                         amcm.data()
-                            .remove_mod_file_from_filepath(String::from(path.to_str().unwrap()));
+                            .remove_local_mod_file_from_filepath(String::from(path.to_str().unwrap()));
                     } else if let RemoveKind::Any = remove_kind {
                         amcm.data()
-                            .remove_mod_file_from_filepath(String::from(path.to_str().unwrap()));
+                            .remove_local_mod_file_from_filepath(String::from(path.to_str().unwrap()));
                     }
                 } else {
                     println!("Event total cost: {:#?}", time_event_start.elapsed());
@@ -198,7 +203,7 @@ impl Core {
                 // Emit
                 let time_start = Instant::now();
                 window
-                    .emit("mod_files_updated", amcm.data().mod_files())
+                    .emit("mod_files_updated", amcm.data().local_mod_files())
                     .expect("Event mod_files_updated emit failed");
                 println!("Emit cost: {:#?}", time_start.elapsed());
 
@@ -212,11 +217,18 @@ impl Core {
     }
 
     pub async fn watch_mod_files(&mut self, dir: String, window: Window) -> Result<(), String> {
-        self.data.update_mod_files(dir.clone()).await;
-        window
-            .emit("mod_files_updated", self.data.mod_files())
-            .expect("Event mod_files_updated emit failed");
+        println!("-> amcm/core.rs/watch_mod_files");
+        
+        let time_start = std::time::Instant::now();
+        // self.data.update_local_mod_files(dir.clone()).await;
+        // println!("   update local mod files cost: {:#?}", time_start.elapsed());
 
+        window
+            .emit("mod_files_updated", self.data.local_mod_files())
+            .expect("Event mod_files_updated emit failed");
+        println!("   emit mod_files_updated cost: {:#?}", time_start.elapsed());
+
+        let time_start1 = std::time::Instant::now();
         let window_ = window.clone();
         match recommended_watcher(move |res: notify::Result<notify::Event>| {
             Core::notify_event_handler(res, window_.clone())
@@ -226,7 +238,9 @@ impl Core {
                 return Err(error.to_string());
             }
         }
+        println!("   create watcher cost: {:#?}", time_start1.elapsed());
 
+        let time_start1 = std::time::Instant::now();
         let path = Path::new(dir.as_str());
         if let Err(error) = self
             .notify_watcher
@@ -236,6 +250,7 @@ impl Core {
         {
             return Err(error.to_string());
         }
+        println!("   watch cost: {:#?}", time_start1.elapsed());
 
         window.once("unwatch_mod_files", move |_| {
             let mut amcm = futures::executor::block_on(async { CORE.lock().await });
@@ -247,6 +262,8 @@ impl Core {
                 .expect("Mod files unwatch failed");
         });
 
+        println!("   total cost: {:#?}", time_start.elapsed());
+        println!("<- amcm/core.rs/watch_mod_files");
         Ok(())
     }
 }

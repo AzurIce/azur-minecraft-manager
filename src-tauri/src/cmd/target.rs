@@ -1,4 +1,4 @@
-use crate::{CORE, amcm::config::Target};
+use crate::amcm::{core::CORE, target::Target};
 
 #[tauri::command]
 pub async fn get_target_list() -> Vec<Target> {

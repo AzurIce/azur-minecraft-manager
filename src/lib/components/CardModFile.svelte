@@ -8,12 +8,7 @@
     Modrinth = "Modrinth",
   }
 
-  export let file: {
-    filename: string;
-    sha1: string;
-    enabled: boolean;
-    belong_state: BelongState;
-  };
+  export let file: ModFile;
   // let checked = true;
 
   import { afterUpdate, beforeUpdate, onDestroy, onMount } from "svelte";
@@ -30,34 +25,34 @@
     server_side: "",
   };
 
-  let prevState = file.belong_state;
+  // let prevState = file.belong_state;
   onMount(async () => {
     // console.log("-> CardModFile/onMount")
-    getData();
+    // getData();
     // console.log("<- CardModFile/onMount")
   });
 
   afterUpdate(async () => {
     // console.log("-> CardModFile/afterUpdate")
-    if (prevState != file.belong_state) {
+    // if (prevState != file.belong_state) {
       // console.log("prevState != file.belong_state")
-      getData();
-      prevState = file.belong_state;
-    }
+      // getData();
+      // prevState = file.belong_state;
+    // }
     // console.log("<- CardModFile/afterUpdate")
   });
 
-  async function getData() {
-    // console.log("-> getData()")
-    if (file.belong_state == BelongState.Modrinth) {
-      // console.log("file.belong_state == BelongState.Modrinth")
-      version = await invoke("get_version_from_hash", { hash: file.sha1 });
-      // console.log(version);
-      project = await invoke("get_project_from_hash", { hash: file.sha1 });
-      // console.log(project);
-    }
-    // console.log("<- getData()")
-  }
+  // async function getData() {
+  //   // console.log("-> getData()")
+  //   if (file.belong_state == BelongState.Modrinth) {
+  //     // console.log("file.belong_state == BelongState.Modrinth")
+  //     version = await invoke("get_version_from_hash", { hash: file.sha1 });
+  //     // console.log(version);
+  //     project = await invoke("get_project_from_hash", { hash: file.sha1 });
+  //     // console.log(project);
+  //   }
+  //   // console.log("<- getData()")
+  // }
 </script>
 
 <div
@@ -67,17 +62,17 @@
 >
   <div class="flex flex-col gap-1 flex-1">
     <div class="flex items-center gap-2">
-      {#if file.belong_state == BelongState.Modrinth}
+      <!-- {#if file.belong_state == BelongState.Modrinth}
         <P>{project.title}</P>
         <Badge>Modrinth</Badge>
-      {:else}
+      {:else} -->
         <P>{file.filename}</P>
         <Badge color="dark">Unknown</Badge>
-      {/if}
+      <!-- {/if} -->
       <!-- <span class="badge ml-2" v-if="isFabricMod">Fabric</span> -->
       <!-- <span class="badge badge-error ml-2" v-if="isBadJsonSyntax">BadJsonSyntax</span> -->
     </div>
-    {#if file.belong_state == BelongState.Modrinth}
+    <!-- {#if file.belong_state == BelongState.Modrinth} -->
       <div class="flex flex-1 h-16 overflow-hidden mt-1 mb-2">
         <!-- <div class="avatar">
           <div class="w-16 rounded">
@@ -115,7 +110,7 @@
           <Badge color="dark">Server: Unsupported</Badge>
         {/if}
       </div>
-    {/if}
+    <!-- {/if} -->
     <!-- <span class="text-gray-400">modId: {{ modId }}</span> -->
   </div>
   <div class="w-20 flex-none flex flex-col items-center">
