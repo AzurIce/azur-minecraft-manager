@@ -57,10 +57,10 @@ pub async fn get_local_mod_files() -> Vec<ModFile> {
 // }
 
 #[tauri::command]
-pub fn get_version_from_hash(hash: String) -> Result<Version, String> {
+pub async fn get_version_from_hash(hash: String) -> Result<Version, String> {
     println!("\n-> amcm/cmd/mcmod.rs/get_version_from_hash");
     let time_start = std::time::Instant::now();
-    let res = match CACHE.blocking_lock().get_version_from_hash(&hash) {
+    let res = match CACHE.lock().await.get_version_from_hash(&hash).await {
         Ok(version) => Ok(version),
         Err(err) => Err(format!("{}", err)),
     };
@@ -70,10 +70,10 @@ pub fn get_version_from_hash(hash: String) -> Result<Version, String> {
 }
 
 #[tauri::command]
-pub fn get_versions_from_hashes(hashes: Vec<String>) -> HashMap<String, Version> {
+pub async fn get_versions_from_hashes(hashes: Vec<String>) -> HashMap<String, Version> {
     println!("\n-> amcm/cmd/mcmod.rs/get_versions_from_hashes");
     let time_start = std::time::Instant::now();
-    let res = CACHE.blocking_lock().get_versions_from_hashes(hashes);
+    let res = CACHE.lock().await.get_versions_from_hashes(hashes).await;
     println!("   total cost: {:#?}", time_start.elapsed());
     println!("<- amcm/cmd/mcmod.rs/get_versions_from_hashes\n");
     res

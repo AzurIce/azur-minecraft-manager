@@ -25,10 +25,10 @@ impl Cache {
         }
     }
 
-    pub fn get_project(&self, id: &str) -> Result<Project, Box<dyn Error>> {
+    pub async fn get_project(&self, id: &str) -> Result<Project, Box<dyn Error>> {
         let path = self.cache_dir.join("projects").join(format!("{}.json", id));
         if !file::is_path_exist(path.as_path()) {
-            return self.update_project(id);
+            return self.update_project(id).await;
         }
 
         let project_json = file::read_to_string(path)?;
@@ -36,22 +36,22 @@ impl Cache {
         Ok(project)
     }
 
-    pub fn update_project(&self, id: &str) -> Result<Project, Box<dyn Error>> {
+    pub async fn update_project(&self, id: &str) -> Result<Project, Box<dyn Error>> {
         let modrinth = Ferinth::default();
 
         let path = self.cache_dir.join("projects").join(format!("{}.json", id));
 
-        let project = self.rt.block_on(modrinth.get_project(id))?;
+        let project = modrinth.get_project(id).await?;
         let project_json = serde_json::to_string(&project)?;
         file::write_str(path, &project_json)?;
         
         Ok(project)
     }
 
-    pub fn get_version(&self, id: &str) -> Result<Version, Box<dyn Error>> {
+    pub async fn get_version(&self, id: &str) -> Result<Version, Box<dyn Error>> {
         let path = self.cache_dir.join("versions").join(format!("{}.json", id));
         if !file::is_path_exist(path.as_path()) {
-            return self.update_version(id);
+            return self.update_version(id).await;
         }
 
         let version_json = file::read_to_string(path)?;
@@ -59,53 +59,53 @@ impl Cache {
         Ok(version)
     }
 
-    pub fn update_version(&self, id: &str) -> Result<Version, Box<dyn Error>> {
+    pub async fn update_version(&self, id: &str) -> Result<Version, Box<dyn Error>> {
         let modrinth = Ferinth::default();
 
         let path = self.cache_dir.join("versions").join(format!("{}.json", id));
 
-        let version = self.rt.block_on(modrinth.get_version(id))?;
+        let version = modrinth.get_version(id).await?;
         let version_json = serde_json::to_string(&version)?;
         file::write_str(path, &version_json)?;
         
         Ok(version)
     }
 
-    pub fn get_versions(&self, ids: Vec<String>) -> Vec<Version> {
+    pub async fn get_versions(&self, ids: Vec<String>) -> Vec<Version> {
         let mut versions = Vec::new();
         for id in &ids {
-            if let Ok(version) = self.get_version(id) {
+            if let Ok(version) = self.get_version(id).await {
                 versions.push(version);
             }
         }
         versions
     }
 
-    pub fn update_versions(&self, ids: Vec<String>) -> Vec<Version> {
+    pub async fn update_versions(&self, ids: Vec<String>) -> Vec<Version> {
         let mut versions = Vec::new();
         for id in &ids {
-            if let Ok(version) = self.update_version(id) {
+            if let Ok(version) = self.update_version(id).await {
                 versions.push(version);
             }
         }
         versions
     }
 
-    pub fn get_version_from_hash(&self, hash: &str) -> Result<Version, Box<dyn Error>> {
+    pub async fn get_version_from_hash(&self, hash: &str) -> Result<Version, Box<dyn Error>> {
         let path = self.cache_dir.join("sha1-version").join(hash);
         match file::is_path_exist(path.as_path()) {
             true => match file::read_to_string(path.as_path()) {
-                Ok(id) => self.get_version(&id),
-                Err(err) => self.update_version_from_hash(hash),
+                Ok(id) => self.get_version(&id).await,
+                Err(err) => self.update_version_from_hash(hash).await,
             },
-            false => self.update_version_from_hash(hash),
+            false => self.update_version_from_hash(hash).await,
         }
     }
 
-    pub fn update_version_from_hash(&self, hash: &str) -> Result<Version, Box<dyn Error>> {
+    pub async fn update_version_from_hash(&self, hash: &str) -> Result<Version, Box<dyn Error>> {
         let modrinth = Ferinth::default();
 
-        let version = self.rt.block_on(modrinth.get_version_from_hash(hash))?;
+        let version = modrinth.get_version_from_hash(hash).await?;
 
         let version_json = serde_json::to_string(&version)?;
         let path = self.cache_dir.join("versions").join(format!("{}.json", version.id));
@@ -117,12 +117,12 @@ impl Cache {
         Ok(version)
     }
 
-    pub fn get_versions_from_hashes(&self, hashes: Vec<String>) -> HashMap<String, Version> {
+    pub async fn get_versions_from_hashes(&self, hashes: Vec<String>) -> HashMap<String, Version> {
         // println!("{:#?}", hashes);
         let mut sha1_to_version = HashMap::new();
 
         for hash in &hashes {
-            if let Ok(version) = self.get_version_from_hash(hash) {
+            if let Ok(version) = self.get_version_from_hash(hash).await {
                 sha1_to_version.insert(hash.to_owned(), version);
             }
         }
@@ -130,11 +130,11 @@ impl Cache {
         sha1_to_version
     }
 
-    pub fn update_versions_from_hashes(&self, hashes: Vec<String>) -> HashMap<String, Version> {
+    pub async fn update_versions_from_hashes(&self, hashes: Vec<String>) -> HashMap<String, Version> {
         let mut sha1_to_version = HashMap::new();
 
         for hash in &hashes {
-            if let Ok(version) = self.update_version_from_hash(hash) {
+            if let Ok(version) = self.update_version_from_hash(hash).await {
                 sha1_to_version.insert(hash.to_owned(), version);
             }
         }

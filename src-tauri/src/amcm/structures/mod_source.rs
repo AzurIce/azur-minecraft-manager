@@ -19,15 +19,15 @@ pub enum ModSource {
 }
 
 impl ModSource {
-    pub fn get_mod_source_info(&self) -> Result<Project, Box<dyn Error>> {
+    pub async fn get_mod_source_info(&self) -> Result<Project, Box<dyn Error>> {
         match self {
-            ModSource::Modrinth(source) => source.get_mod_source_info()
+            ModSource::Modrinth(source) => source.get_mod_source_info().await
         }
     }
 
-    pub fn update_mod_source_info(&self) -> Result<Project, Box<dyn Error>> {
+    pub async fn update_mod_source_info(&self) -> Result<Project, Box<dyn Error>> {
         match self {
-            ModSource::Modrinth(source) => source.update_mod_source_info()
+            ModSource::Modrinth(source) => source.update_mod_source_info().await
         }
     }
 }
@@ -47,11 +47,11 @@ impl ModrinthModSource {
         MOD_SOURCES_DIR.join(&self.project_id)
     }
 
-    pub fn get_mod_source_info(&self) -> Result<Project, Box<dyn Error>> {
-        executor::block_on(CACHE.lock()).get_project(&self.project_id)
+    pub async fn get_mod_source_info(&self) -> Result<Project, Box<dyn Error>> {
+        CACHE.lock().await.get_project(&self.project_id).await
     }
 
-    pub fn update_mod_source_info(&self) -> Result<Project, Box<dyn Error>> {
-        executor::block_on(CACHE.lock()).update_project(&self.project_id)
+    pub async fn update_mod_source_info(&self) -> Result<Project, Box<dyn Error>> {
+        CACHE.lock().await.update_project(&self.project_id).await
     }
 }

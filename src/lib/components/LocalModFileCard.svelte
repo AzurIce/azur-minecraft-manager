@@ -1,10 +1,11 @@
 <script lang="ts">
   import type { ModFile } from "$lib/typing/typing";
-  import { Badge, P } from "flowbite-svelte";
+  import { Badge, P, Spinner } from "flowbite-svelte";
   import Toggle from "$lib/components/Toggle.svelte";
 
   export let file: ModFile;
   let version: any;
+  let loadingVersion = true;
   // let project: any;
   // let checked = true;
 
@@ -12,11 +13,13 @@
   import { invoke } from "@tauri-apps/api";
 
   onMount(() => {
-    invoke("get_version_from_hash", {hash: file.sha1 }).then((res) => {
-      version = res;
-    }).catch((err) => {
-      // console.error(err);
-    })
+    invoke("get_version_from_hash", { hash: file.sha1 })
+      .then((res) => {
+        version = res;
+      })
+      .catch((err) => {
+        // console.error(err);
+      });
     // console.log(file.belongState)
     // console.log(version);
   });
@@ -24,11 +27,15 @@
 
 <div
   class="p-3 flex items-center 
-    {file.enabled ? 'bg-white' : 'bg-gray-50'} rounded-md shadow-sm border gap-2"
+    {file.enabled
+    ? 'bg-white'
+    : 'bg-gray-50'} rounded-md shadow-sm border gap-2"
 >
   <!-- <div class="flex items-center justify-center gap-2"> -->
   <P>{file.filename}</P>
-  {#if version}
+  {#if loadingVersion}
+    <Badge color="dark"><Spinner size={4} /></Badge>
+  {:else if version}
     <Badge>Modrinth</Badge>
   {:else}
     <Badge color="dark">Unknown</Badge>

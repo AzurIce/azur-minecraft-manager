@@ -22,20 +22,20 @@ impl Target {
         self.mod_sources.push(mod_source);
     }
     
-    pub fn get_mod_sources_info(&self) -> Vec<Project> {
+    pub async fn get_mod_sources_info(&self) -> Vec<Project> {
         let mut mod_sources_info = Vec::new();
         for mod_source in &self.mod_sources {
-            if let Ok(mod_source_info) = mod_source.get_mod_source_info() {
+            if let Ok(mod_source_info) = mod_source.get_mod_source_info().await {
                 mod_sources_info.push(mod_source_info);
             }
         }
         mod_sources_info
     }
 
-    pub fn update_mod_sources_info(&self) -> Vec<Project> {
+    pub async fn update_mod_sources_info(&self) -> Vec<Project> {
         let mut mod_sources_info = Vec::new();
         for mod_source in &self.mod_sources {
-            if let Ok(mod_source_info) = mod_source.update_mod_source_info() {
+            if let Ok(mod_source_info) = mod_source.update_mod_source_info().await {
                 mod_sources_info.push(mod_source_info);
             }
         }
