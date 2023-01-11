@@ -35,8 +35,6 @@
       .finally(() => {
         loadingVersion = false;
       });
-    // console.log(file.belongState)
-    // console.log(version);
   });
 </script>
 
@@ -68,7 +66,7 @@
       hover:bg-blue-200 hover:text-blue-900 dark:hover:bg-blue-800 dark:hover:text-blue-300"
       on:click={() => {
         // console.log(version.project_id);
-        invoke("add_target_mod_source", {target_index: targetIndex, project_id: version.project_id})
+        invoke("add_target_mod_source", {target_id: $targetIndex, project_id: version.project_id})
       }}
     >
       Modrinth<i class="ri-add-line" />
@@ -79,7 +77,7 @@
       class="p-2 text-xs bg-white text-gray-900
       border border-gray-200 rounded-lg shadow-sm"
     >
-      添加到 Mod 源
+      添加到远端 Mod
     </Tooltip>
   {:else}
     <span

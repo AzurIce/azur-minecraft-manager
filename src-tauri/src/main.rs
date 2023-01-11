@@ -23,7 +23,7 @@ fn main() {
     // }
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            cmd::load,
+            // cmd::load,
             cmd::target::get_target_list,
             cmd::target::get_target,
             cmd::target::add_target,
@@ -40,8 +40,8 @@ fn main() {
             // cmd::mcmod::get_mod_files,
             cmd::mcmod::update_local_mod_files,
             // cmd::mcmod::set_mod_file_enabled,
-            cmd::mcmod::enable_mod_file,
-            cmd::mcmod::disable_mod_file,
+            cmd::mod_file::enable_mod_file,
+            cmd::mod_file::disable_mod_file,
             // cmd::mcmod::enter_manage_target,
             // cmd::mcmod::leave_manage_target,
             cmd::mcmod::watch_mod_files,

@@ -14,7 +14,7 @@ pub enum TargetKind {
 pub struct Target {
     pub kind: TargetKind,
     pub location: String,
-    pub mod_sources: Vec<ModSource>
+    pub mod_sources: Vec<ModSource>,
 }
 
 impl Target {

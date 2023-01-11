@@ -6,6 +6,11 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
 
+use tokio::sync::Mutex;
+lazy_static! {
+    pub static ref DATA: Mutex<Data> = Mutex::new(Data::default());
+}
+
 // 运行时数据
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Data {
@@ -27,8 +32,8 @@ impl Data {
         }
     }
 
-    pub async fn update_local_mod_files(&mut self, path: String) -> Vec<ModFile> {
-        println!("\n-> amcm/data.rs/update_mod_files: {:#?}", path);
+    pub async fn update_local_mod_files<P: AsRef<Path>>(&mut self, path: P) -> Vec<ModFile> {
+        println!("\n-> amcm/data.rs/update_mod_files: {:#?}", path.as_ref());
         let mut mod_file_list: Vec<ModFile> = Vec::new();
         for entry in fs::read_dir(path).unwrap() {
             let file_path = entry.unwrap().path();
@@ -46,31 +51,31 @@ impl Data {
         mod_file_list
     }
 
-    pub fn update_local_mod_file(&mut self, path: String) {
+    pub fn update_local_mod_file<P: AsRef<Path>>(&mut self, path: P) {
         println!("\n-> data.rs/update_mod_file");
-
         use std::time::Instant;
+
         let time_start = Instant::now();
         let new_local_mod_file = ModFile::of(path);
-        // if let Some(new_mod_file) = self.mod_file_of(path) {
-            println!("   mod_file_of cost: {:#?}", time_start.elapsed());
-            let time_start = Instant::now();
-            for mod_file in &mut self.local_mod_files {
-                if mod_file.sha1 == new_local_mod_file.sha1 {
-                    println!("   Find mod_file cost: {:#?}", time_start.elapsed());
-                    let time_start = Instant::now();
-                    *mod_file = new_local_mod_file;
-                    println!("   Assign mod_file cost: {:#?}", time_start.elapsed());
-                    println!("<- data.rs/update_mod_file");
-                    return;
-                }
+        println!("   mod_file_of cost: {:#?}", time_start.elapsed());
+
+        let time_start = Instant::now();
+        for mod_file in &mut self.local_mod_files {
+            if mod_file.sha1 == new_local_mod_file.sha1 {
+                println!("   Find mod_file cost: {:#?}", time_start.elapsed());
+                let time_start = Instant::now();
+                *mod_file = new_local_mod_file;
+                println!("   Assign mod_file cost: {:#?}", time_start.elapsed());
+                println!("<- data.rs/update_mod_file");
+                return;
             }
-            self.local_mod_files.push(new_local_mod_file);
-        // }
+        }
+        self.local_mod_files.push(new_local_mod_file);
+
         println!("<- data.rs/update_mod_file\n");
     }
-    pub fn remove_local_mod_file_from_filepath(&mut self, path: String) {
-        let path = Path::new(&path);
+    pub fn remove_local_mod_file_from_filepath<P: AsRef<Path>>(&mut self, path: P) {
+        let path = path.as_ref();
         for (index, local_mod_file) in self.local_mod_files.iter().enumerate() {
             if Path::new(&local_mod_file.path) == path {
                 self.local_mod_files.remove(index);

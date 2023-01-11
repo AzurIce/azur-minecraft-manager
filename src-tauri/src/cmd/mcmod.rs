@@ -1,5 +1,7 @@
+use crate::amcm::data::DATA;
 use crate::amcm::structures::mod_file::ModFile;
 use crate::amcm::core::CORE;
+use crate::amcm::config::CONFIG;
 use crate::amcm::cache::CACHE;
 use ferinth::structures::{project::Project, version::Version};
 use std::collections::HashMap;
@@ -11,50 +13,8 @@ use futures::executor;
 
 #[tauri::command]
 pub async fn get_local_mod_files() -> Vec<ModFile> {
-    CORE.lock().await.data().local_mod_files()
+    DATA.lock().await.local_mod_files()
 }
-
-// #[tauri::command]
-// pub async fn get_mod_file_list(path: String) -> Vec<ModFile> {
-//     let mut mod_file_list: Vec<ModFile> = Vec::new();
-//     for entry in fs::read_dir(path).unwrap() {
-//         let file_path = entry.unwrap().path();
-//         if file_path.is_file() && file_path.extension().unwrap() == "jar" {
-//             mod_file_list.push(ModFile::of(&file_path).await);
-//         }
-//     }
-//     mod_file_list
-// }
-
-// #[tauri::command]
-// pub async fn update_data_from_hashes(hashes: Vec<String>) -> Result<(), String> {
-//     CORE.lock().await.update_data_from_hashes(hashes).await
-// }
-
-// #[tauri::command]
-// pub async fn update_data_from_hash(hash: String) -> Result<(), String> {
-//     CORE.lock().await.update_data_from_hash(hash).await
-// }
-
-// #[tauri::command]
-// pub async fn get_versions_from_hashes(hashes: Vec<String>) -> Result<HashMap<String, Version>, String> {
-//     let modrinth = ferinth::Ferinth::default();
-//         let res = modrinth.get_versions_from_hashes(hashes).await;
-//         if let Err(error) = res {
-//             return Err(error.to_string());
-//         }
-//         Ok(res.unwrap())
-
-// }
-
-// #[tauri::command]
-// pub async fn get_project_from_hash(hash: String) -> Option<Project> {
-//     if let Some(project) = CORE.lock().await.data().get_project_from_hash(&hash) {
-//         Some(project.clone())
-//     } else {
-//         None
-//     }
-// }
 
 #[tauri::command]
 pub async fn get_version_from_hash(hash: String) -> Result<Version, String> {
@@ -72,22 +32,12 @@ pub async fn get_version_from_hash(hash: String) -> Result<Version, String> {
 
 #[tauri::command]
 pub async fn get_versions_from_hashes(hashes: Vec<String>) -> HashMap<String, Version> {
-    // println!("\n-> amcm/cmd/mcmod.rs/get_versions_from_hashes");
-    let time_start = std::time::Instant::now();
-    let res = CACHE.lock().await.get_versions_from_hashes(hashes).await;
-    // println!("   total cost: {:#?}", time_start.elapsed());
-    // println!("<- amcm/cmd/mcmod.rs/get_versions_from_hashes\n");
-    res
+    CACHE.lock().await.get_versions_from_hashes(hashes).await
 }
-
-// #[tauri::command]
-// pub async fn get_project_from_hashes(hashes: Vec<String>) -> HashMap<String, Project> {
-//     CORE.lock().await.data().get_project_from_hashes(hashes)
-// }
 
 #[tauri::command]
 pub async fn update_local_mod_files(dir: String) -> Vec<ModFile> {
-    CORE.lock().await.data().update_local_mod_files(dir).await
+    DATA.lock().await.update_local_mod_files(dir).await
 }
 
 #[tauri::command]
@@ -104,7 +54,7 @@ pub async fn target_watch_mod_files(index: usize, window: Window) -> Result<(), 
     println!("   get lock cost: {:#?}", time_start.elapsed());
 
     let time_start1 = std::time::Instant::now();
-    let target = amcm.config().get_target(index)?;
+    let target = CONFIG.lock().await.get_target(index)?;
     println!("   get target cost: {:#?}", time_start1.elapsed());
 
     let time_start1 = std::time::Instant::now();
@@ -117,29 +67,3 @@ pub async fn target_watch_mod_files(index: usize, window: Window) -> Result<(), 
     res
 }
 
-// #[tauri::command]
-// pub async fn set_mod_file_enabled(hash: String, enabled: bool) -> Result<(), String> {
-//     if let Some(mod_file) = CORE.lock().await.data().get_mod_file_from_hash(hash) {
-//         mod_file.set_enabled(enabled)
-//     } else {
-//         Err(String::from("Not found"))
-//     }
-// }
-
-#[tauri::command]
-pub async fn enable_mod_file(hash: String) -> Result<(), String> {
-    if let Some(mod_file) = CORE.lock().await.data().get_mod_file_from_hash(hash) {
-        mod_file.enable()
-    } else {
-        Err(String::from("Not found"))
-    }
-}
-
-#[tauri::command]
-pub async fn disable_mod_file(hash: String) -> Result<(), String> {
-    if let Some(mod_file) = CORE.lock().await.data().get_mod_file_from_hash(hash) {
-        mod_file.disable()
-    } else {
-        Err(String::from("Not found"))
-    }
-}
