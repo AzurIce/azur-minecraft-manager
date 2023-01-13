@@ -48,15 +48,31 @@ impl Config {
         }
     }
 
-    pub fn add_mod_source_to_target(&mut self, target_id: usize, project_id: String) -> Result<(), String> {
+    ///// mod_source /////
+    pub fn add_mod_source(&mut self, project_id: String) -> Result<(), Box<dyn Error>> {
+        for mod_source in &self.mod_sources {
+            match mod_source {
+                ModSource::Modrinth(modrinth_mod_source) => {
+                    if modrinth_mod_source.project_id == project_id {
+                        return Ok(())
+                    }
+                },
+            }
+        }
+        self.mod_sources.push(ModSource::Modrinth(ModrinthModSource::new(project_id)));
+        self.save()?;
+        Ok(())
+    }
+
+    pub fn add_mod_source_to_target(&mut self, target_id: usize, project_id: String) -> Result<(), Box<dyn Error>> {
         if let Some(target) = self.targets.get_mut(target_id) {
             target.add_mod_source(ModSource::Modrinth(ModrinthModSource::new(project_id)));
-            self.save();
-            Ok(())
-        } else {
-            Err(String::from("Index out of bound"))
+            self.save()?;
         }
+        Ok(())
     }
+
+
 
     pub fn add_target(&mut self, target: Target) {
         self.targets.push(target);

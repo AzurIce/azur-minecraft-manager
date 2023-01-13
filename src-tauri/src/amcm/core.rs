@@ -16,7 +16,7 @@ use crate::amcm::data::DATA;
 
 use tokio::sync::Mutex;
 lazy_static! {
-    pub static ref CORE: Mutex<Core> = Mutex::new(Core::init());
+    pub static ref CORE: Mutex<Core> = Mutex::new(Core::default());
 }
 
 use notify::{recommended_watcher, RecommendedWatcher, RecursiveMode, Watcher};
@@ -32,10 +32,6 @@ impl Core {
         }
     }
 
-    pub fn init() -> Core {
-        Core::default()
-    }
-
     fn notify_event_handler(
         res: notify::Result<notify::Event>,
         window: Window,
@@ -49,8 +45,14 @@ impl Core {
                 // Get data lock
                 let mut data = DATA.blocking_lock();
 
+                
                 // Update mod file
                 let path = event.paths.last().unwrap();
+                if path.file_name().unwrap().to_str().unwrap().starts_with("_amcm_")
+                    || (path.extension().unwrap() != "jar" && path.extension().unwrap() != "disabled")
+                {
+                    return Ok(());
+                }
                 let kind = event.kind;
                 if let EventKind::Create(create_kind) = kind {
                     if let CreateKind::File = create_kind {

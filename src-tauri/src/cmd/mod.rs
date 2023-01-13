@@ -3,6 +3,9 @@ pub mod mcmod;
 pub mod mod_file;
 pub mod mod_source;
 
+#[cfg(test)]
+pub mod mod_source_test;
+
 // use crate::amcm::core::CORE;
 
 // #[tauri::command]

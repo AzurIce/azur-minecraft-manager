@@ -1,10 +1,10 @@
-use std::path::{PathBuf, Path};
+use std::{path::{Path, PathBuf}, error::Error, fs};
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-use crate::utils::file;
+use crate::{utils::file, amcm::cache::CACHE, amcm::AMCM_DIR};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, Hash, PartialEq)]
 pub struct ModFile {
     pub path: String,
     pub filename: String,
@@ -37,14 +37,13 @@ impl ModFile {
     }
 
     pub fn enable(&self) -> Result<(), String> {
-        use std::fs;
         use std::time::Instant;
         if (self.enabled == true) {
-            return Ok(())
+            return Ok(());
         }
 
         let src = self.path.clone();
-        let dst = String::from(&self.path[..&self.path.len()-9]);
+        let dst = String::from(&self.path[..&self.path.len() - 9]);
 
         let time_start = Instant::now();
         if let Err(error) = fs::rename(src, dst) {
@@ -61,11 +60,11 @@ impl ModFile {
         use std::time::Instant;
 
         if (self.enabled == false) {
-            return Ok(())
+            return Ok(());
         }
 
         let src = self.path.clone();
-        let dst= String::from(self.path.clone() + ".disabled");
+        let dst = String::from(self.path.clone() + ".disabled");
 
         let time_start = Instant::now();
         if let Err(error) = fs::rename(src, dst) {
@@ -77,4 +76,19 @@ impl ModFile {
         }
     }
 
+    pub async fn move_to_storage(&self) -> Result<(), Box<dyn Error>> {
+        let version = CACHE.lock().await.get_version_from_hash(&self.sha1).await?;
+        let dst = AMCM_DIR
+            .join("storage")
+            .join("mods")
+            .join(version.project_id)
+            .join(format!("{}.jar", version.id));
+        if let Some(dir) = dst.parent() {
+            fs::create_dir_all(dir)?;
+            fs::copy(&self.path, dst)?;
+            let mod_file_path = Path::new(&self.path);
+            fs::rename(&mod_file_path, mod_file_path.parent().unwrap().join(format!("_amcm_{}", self.filename)))?;
+        }
+        Ok(())
+    }
 }

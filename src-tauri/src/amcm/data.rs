@@ -3,6 +3,7 @@ use crate::amcm::structures::mod_file::ModFile;
 use ferinth::structures::{project::Project, version::Version};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
+use std::error::Error;
 use std::fs;
 use std::path::Path;
 
@@ -14,20 +15,12 @@ lazy_static! {
 // 运行时数据
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Data {
-    // versions: HashMap<String, Version>,
-    // projects: HashMap<String, Project>,
-    // hash_to_mfb: HashMap<String, ModFileBelong>,
-    // modrinth_sha1s: HashSet<String>,
     local_mod_files: Vec<ModFile>,
 }
 
 impl Data {
     pub fn default() -> Data {
         Data {
-            // versions: HashMap::new(),
-            // projects: HashMap::new(),
-            // modrinth_sha1s: HashSet::new(),
-            // hash_to_mfb: HashMap::new(),
             local_mod_files: Vec::new(),
         }
     }
@@ -39,9 +32,9 @@ impl Data {
             let file_path = entry.unwrap().path();
 
             if file_path.is_file()
-                && !file_path.starts_with("_amcm_")
-                && file_path.extension().unwrap() == "jar"
-                || file_path.extension().unwrap() == "disabled"
+                && !file_path.file_name().unwrap().to_str().unwrap().starts_with("_amcm_")
+                && (file_path.extension().unwrap() == "jar"
+                || file_path.extension().unwrap() == "disabled")
             {
                 mod_file_list.push(ModFile::of(&file_path));
             }
@@ -85,13 +78,7 @@ impl Data {
     }
 
     pub fn local_mod_files(&self) -> Vec<ModFile> {
-        println!("-> data.rs/local_mod_files");
-        use std::time::Instant;
-        let time_start = Instant::now();
-        let res = self.local_mod_files.clone();
-        println!("   local_mod_files.clone() cost: {:#?}", time_start.elapsed());
-        println!("<- data.rs/local_mod_files\n");
-        res
+        self.local_mod_files.clone()
     }
 
     pub fn get_mod_file_from_hash(&self, hash: String) -> Option<ModFile> {
@@ -101,6 +88,16 @@ impl Data {
             }
         }
         None
+    }
+
+    pub fn remove_local_mod_file_from_hash(&mut self, hash: String) -> Result<(), Box<dyn Error>> {
+        for (index, &ref mod_file) in self.local_mod_files.iter().enumerate() {
+            if mod_file.sha1 == hash {
+                self.local_mod_files.remove(index);
+                break;
+            }
+        }
+        Ok(())
     }
 
 }

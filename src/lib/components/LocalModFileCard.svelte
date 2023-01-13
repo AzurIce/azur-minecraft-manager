@@ -66,7 +66,16 @@
       hover:bg-blue-200 hover:text-blue-900 dark:hover:bg-blue-800 dark:hover:text-blue-300"
       on:click={() => {
         // console.log(version.project_id);
-        invoke("add_target_mod_source", {target_id: $targetIndex, project_id: version.project_id})
+        invoke("add_mod_source_from_local_mod_file", {projectId: version.project_id, versionId: version.id, modFileHash: file.sha1}).then((res) => {
+          console.log("added mod source from local file", res)
+          invoke("add_mod_source_to_target", {targetId: $targetIndex, projectId: version.project_id}).then((res) => {
+            console.log(res);
+          }).catch((err) => {
+            console.log(err);
+          })
+        }).catch((err) => {
+          console.log(err);
+        })
       }}
     >
       Modrinth<i class="ri-add-line" />

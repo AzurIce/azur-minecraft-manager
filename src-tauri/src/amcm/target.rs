@@ -2,6 +2,7 @@ use ferinth::structures::project::Project;
 use serde::{Deserialize, Serialize};
 
 use super::structures::mod_source::ModSource;
+use std::collections::HashSet;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 // 序列化为 Json 后其值对应的就是名称
@@ -14,12 +15,12 @@ pub enum TargetKind {
 pub struct Target {
     pub kind: TargetKind,
     pub location: String,
-    pub mod_sources: Vec<ModSource>,
+    pub mod_sources: HashSet<ModSource>,
 }
 
 impl Target {
     pub fn add_mod_source(&mut self, mod_source: ModSource) {
-        self.mod_sources.push(mod_source);
+        self.mod_sources.insert(mod_source);
     }
     
     pub async fn get_mod_sources_info(&self) -> Vec<Project> {

@@ -42,6 +42,11 @@ fn main() {
             // cmd::mcmod::set_mod_file_enabled,
             cmd::mod_file::enable_mod_file,
             cmd::mod_file::disable_mod_file,
+
+            cmd::mod_source::add_mod_source,
+            cmd::mod_source::add_mod_source_from_local_mod_file,
+            cmd::mod_source::add_mod_source_to_target,
+
             // cmd::mcmod::enter_manage_target,
             // cmd::mcmod::leave_manage_target,
             cmd::mcmod::watch_mod_files,

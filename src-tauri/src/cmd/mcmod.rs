@@ -51,16 +51,10 @@ pub async fn target_watch_mod_files(index: usize, window: Window) -> Result<(), 
     let time_start = std::time::Instant::now();
 
     let mut amcm = CORE.lock().await;
-    println!("   get lock cost: {:#?}", time_start.elapsed());
 
-    let time_start1 = std::time::Instant::now();
     let target = CONFIG.lock().await.get_target(index)?;
-    println!("   get target cost: {:#?}", time_start1.elapsed());
-
-    let time_start1 = std::time::Instant::now();
     let dir = Path::new(&target.location).join("mods/");
     let res = amcm.watch_mod_files(String::from(dir.to_str().unwrap()), window).await;
-    println!("   watch mod files cost: {:#?}", time_start1.elapsed());
 
     println!("   total cost: {:#?}", time_start.elapsed());
     println!("<- amcm/cmd/mcmod.rs/target_watch_mod_files\n");

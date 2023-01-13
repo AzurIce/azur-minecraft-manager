@@ -25,6 +25,7 @@ impl Cache {
         }
     }
 
+    ///// project /////
     pub async fn get_project(&self, id: &str) -> Result<Project, Box<dyn Error>> {
         let path = self.cache_dir.join("projects").join(format!("{}.json", id));
         if !file::is_path_exist(path.as_path()) {
@@ -48,6 +49,7 @@ impl Cache {
         Ok(project)
     }
 
+    ///// version /////
     pub async fn get_version(&self, id: &str) -> Result<Version, Box<dyn Error>> {
         let path = self.cache_dir.join("versions").join(format!("{}.json", id));
         if !file::is_path_exist(path.as_path()) {

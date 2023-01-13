@@ -10,7 +10,8 @@ lazy_static! {
 }
 
 // ModSource //
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, Hash, PartialEq)]
+#[serde(tag = "type")]
 pub enum ModSource {
 	Modrinth(ModrinthModSource),
 	// CurseForge,
@@ -33,9 +34,9 @@ impl ModSource {
 }
 
 // ModrinthModSource //
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, Hash, PartialEq)]
 pub struct ModrinthModSource {
-    project_id: String,
+    pub project_id: String,
 }
 
 impl ModrinthModSource {
