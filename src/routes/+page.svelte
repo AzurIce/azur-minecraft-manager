@@ -1,19 +1,17 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { invoke } from "@tauri-apps/api";
   import ModalAddTarget from "$lib/components/ModalAddTarget.svelte";
   import CardTarget from "$lib/components/CardTarget.svelte";
   import { Button } from "flowbite-svelte";
-  import type { TargetType, Target } from "$lib/typing/typing";
+  import type { Target } from "$lib/typing/typing";
   import Toggle from "$lib/components/Toggle.svelte";
+    import { getTargets } from "$lib/apis/target";
 
   let targetList: Target[] = [];
   let modalAddTarget = false;
 
   onMount(async () => {
-    targetList = await invoke<Target[]>("get_target_list");
-    // targetList = JSON.parse(res);
-    // console.log(targetList);
+    targetList = await getTargets();
   });
 
   function onUpdateTargets(event: CustomEvent) {
@@ -21,7 +19,6 @@
   }
 </script>
 
-<!-- <div class="container mx-auto flex flex-col"> -->
 <div class="flex-1 flex flex-col items-center">
   <img
     src="/AzurCraft.svg"

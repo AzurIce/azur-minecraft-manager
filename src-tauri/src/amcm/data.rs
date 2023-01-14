@@ -1,8 +1,7 @@
 // use crate::amcm::structures::BelongState;
 use crate::amcm::structures::mod_file::ModFile;
-use ferinth::structures::{project::Project, version::Version};
+// use crate::amcm::RT;
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::fs;
 use std::path::Path;
@@ -15,74 +14,62 @@ lazy_static! {
 // 运行时数据
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Data {
-    local_mod_files: Vec<ModFile>,
+    mod_files: Vec<ModFile>,
 }
 
 impl Data {
     pub fn default() -> Data {
         Data {
-            local_mod_files: Vec::new(),
+            mod_files: Vec::new(),
         }
     }
 
-    pub async fn update_local_mod_files<P: AsRef<Path>>(&mut self, path: P) -> Vec<ModFile> {
+    pub fn mod_files(&self) -> Vec<ModFile> {
+        self.mod_files.clone()
+    }
+
+    pub fn update_mod_files<P: AsRef<Path>>(&mut self, path: P) -> Vec<ModFile> {
         println!("\n-> amcm/data.rs/update_mod_files: {:#?}", path.as_ref());
-        let mut mod_file_list: Vec<ModFile> = Vec::new();
+        let mut mod_files: Vec<ModFile> = Vec::new();
         for entry in fs::read_dir(path).unwrap() {
             let file_path = entry.unwrap().path();
 
             if file_path.is_file()
-                && !file_path.file_name().unwrap().to_str().unwrap().starts_with("_amcm_")
                 && (file_path.extension().unwrap() == "jar"
                 || file_path.extension().unwrap() == "disabled")
             {
-                mod_file_list.push(ModFile::of(&file_path));
+                mod_files.push(ModFile::of(&file_path));
             }
         }
-        self.local_mod_files = mod_file_list.clone();
+        self.mod_files = mod_files.clone();
         println!("<- amcm/data.rs/update_mod_files\n");
-        mod_file_list
+        mod_files
     }
 
-    pub fn update_local_mod_file<P: AsRef<Path>>(&mut self, path: P) {
-        println!("\n-> data.rs/update_mod_file");
-        use std::time::Instant;
+    pub fn update_mod_file<P: AsRef<Path>>(&mut self, path: P) {
+        let new_mod_file = ModFile::of(path);
 
-        let time_start = Instant::now();
-        let new_local_mod_file = ModFile::of(path);
-        println!("   mod_file_of cost: {:#?}", time_start.elapsed());
-
-        let time_start = Instant::now();
-        for mod_file in &mut self.local_mod_files {
-            if mod_file.sha1 == new_local_mod_file.sha1 {
-                println!("   Find mod_file cost: {:#?}", time_start.elapsed());
-                let time_start = Instant::now();
-                *mod_file = new_local_mod_file;
-                println!("   Assign mod_file cost: {:#?}", time_start.elapsed());
-                println!("<- data.rs/update_mod_file");
+        for mod_file in &mut self.mod_files {
+            if mod_file.sha1 == new_mod_file.sha1 {
+                *mod_file = new_mod_file;
                 return;
             }
         }
-        self.local_mod_files.push(new_local_mod_file);
-
-        println!("<- data.rs/update_mod_file\n");
+        self.mod_files.push(new_mod_file);
     }
-    pub fn remove_local_mod_file_from_filepath<P: AsRef<Path>>(&mut self, path: P) {
+
+    pub fn remove_mod_file_from_filepath<P: AsRef<Path>>(&mut self, path: P) {
         let path = path.as_ref();
-        for (index, local_mod_file) in self.local_mod_files.iter().enumerate() {
-            if Path::new(&local_mod_file.path) == path {
-                self.local_mod_files.remove(index);
+        for (index, mod_file) in self.mod_files.iter().enumerate() {
+            if Path::new(&mod_file.path) == path {
+                self.mod_files.remove(index);
                 return;
             }
         }
-    }
-
-    pub fn local_mod_files(&self) -> Vec<ModFile> {
-        self.local_mod_files.clone()
     }
 
     pub fn get_mod_file_from_hash(&self, hash: String) -> Option<ModFile> {
-        for mod_file in &self.local_mod_files {
+        for mod_file in &self.mod_files {
             if mod_file.sha1 == hash {
                 return Some((*mod_file).clone());
             }
@@ -90,10 +77,10 @@ impl Data {
         None
     }
 
-    pub fn remove_local_mod_file_from_hash(&mut self, hash: String) -> Result<(), Box<dyn Error>> {
-        for (index, &ref mod_file) in self.local_mod_files.iter().enumerate() {
+    pub fn remove_mod_file_from_hash(&mut self, hash: String) -> Result<(), Box<dyn Error>> {
+        for (index, &ref mod_file) in self.mod_files.iter().enumerate() {
             if mod_file.sha1 == hash {
-                self.local_mod_files.remove(index);
+                self.mod_files.remove(index);
                 break;
             }
         }

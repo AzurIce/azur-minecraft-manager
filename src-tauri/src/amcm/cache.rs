@@ -1,14 +1,13 @@
 use std::{path::PathBuf, collections::HashMap, error::Error};
 
 use ferinth::{structures::{project::Project, version::Version}, Ferinth};
-use futures::executor;
-use serde::{Deserialize, Serialize};
 
 use crate::utils::file;
 
 use super::AMCM_DIR;
 
-use tokio::{sync::Mutex, runtime::Runtime};
+use tokio::sync::Mutex;
+use tokio::runtime::Runtime;
 lazy_static! {
     pub static ref CACHE: Mutex<Cache> = Mutex::new(Cache::default());
 }
@@ -26,10 +25,10 @@ impl Cache {
     }
 
     ///// project /////
-    pub async fn get_project(&self, id: &str) -> Result<Project, Box<dyn Error>> {
+    pub fn get_project(&self, id: &str) -> Result<Project, Box<dyn Error>> {
         let path = self.cache_dir.join("projects").join(format!("{}.json", id));
         if !file::is_path_exist(path.as_path()) {
-            return self.update_project(id).await;
+            return self.update_project(id);
         }
 
         let project_json = file::read_to_string(path)?;
@@ -37,12 +36,12 @@ impl Cache {
         Ok(project)
     }
 
-    pub async fn update_project(&self, id: &str) -> Result<Project, Box<dyn Error>> {
+    pub fn update_project(&self, id: &str) -> Result<Project, Box<dyn Error>> {
         let modrinth = Ferinth::default();
 
         let path = self.cache_dir.join("projects").join(format!("{}.json", id));
 
-        let project = modrinth.get_project(id).await?;
+        let project = self.rt.block_on(modrinth.get_project(id))?;
         let project_json = serde_json::to_string(&project)?;
         file::write_str(path, &project_json)?;
         
@@ -50,64 +49,75 @@ impl Cache {
     }
 
     ///// version /////
-    pub async fn get_version(&self, id: &str) -> Result<Version, Box<dyn Error>> {
+    pub fn get_version(&self, id: &str) -> Result<Version, Box<dyn Error>> {
         let path = self.cache_dir.join("versions").join(format!("{}.json", id));
         if !file::is_path_exist(path.as_path()) {
-            return self.update_version(id).await;
+            return self.update_version(id);
         }
 
         let version_json = file::read_to_string(path)?;
         let version = serde_json::from_str(&version_json)?;
         Ok(version)
     }
+    pub fn get_cached_version(&self, id: &str) -> Result<Version, Box<dyn Error>> {
+        let path = self.cache_dir.join("versions").join(format!("{}.json", id));
+        let version_json = file::read_to_string(path)?;
+        let version = serde_json::from_str(&version_json)?;
+        Ok(version)
+    }
 
-    pub async fn update_version(&self, id: &str) -> Result<Version, Box<dyn Error>> {
+    pub fn update_version(&self, id: &str) -> Result<Version, Box<dyn Error>> {
         let modrinth = Ferinth::default();
 
         let path = self.cache_dir.join("versions").join(format!("{}.json", id));
 
-        let version = modrinth.get_version(id).await?;
+        let version = self.rt.block_on(modrinth.get_version(id))?;
         let version_json = serde_json::to_string(&version)?;
         file::write_str(path, &version_json)?;
         
         Ok(version)
     }
 
-    pub async fn get_versions(&self, ids: Vec<String>) -> Vec<Version> {
+    pub fn get_versions(&self, ids: Vec<String>) -> Vec<Version> {
         let mut versions = Vec::new();
         for id in &ids {
-            if let Ok(version) = self.get_version(id).await {
+            if let Ok(version) = self.get_version(id) {
                 versions.push(version);
             }
         }
         versions
     }
 
-    pub async fn update_versions(&self, ids: Vec<String>) -> Vec<Version> {
+    pub fn update_versions(&self, ids: Vec<String>) -> Vec<Version> {
         let mut versions = Vec::new();
         for id in &ids {
-            if let Ok(version) = self.update_version(id).await {
+            if let Ok(version) = self.update_version(id) {
                 versions.push(version);
             }
         }
         versions
     }
 
-    pub async fn get_version_from_hash(&self, hash: &str) -> Result<Version, Box<dyn Error>> {
+    pub fn get_cached_version_from_hash(&self, hash: &str) -> Result<Version, Box<dyn Error>> {
+        let path = self.cache_dir.join("sha1-version").join(hash);
+        let id = file::read_to_string(path.as_path())?;
+        self.get_cached_version(&id)
+    }
+    pub fn get_version_from_hash(&self, hash: &str) -> Result<Version, Box<dyn Error>> {
         let path = self.cache_dir.join("sha1-version").join(hash);
         match file::is_path_exist(path.as_path()) {
             true => match file::read_to_string(path.as_path()) {
-                Ok(id) => self.get_version(&id).await,
-                Err(err) => self.update_version_from_hash(hash).await,
+                Ok(id) => self.get_version(&id),
+                Err(err) => self.update_version_from_hash(hash),
             },
-            false => self.update_version_from_hash(hash).await,
+            false => self.update_version_from_hash(hash),
         }
     }
 
-    pub async fn update_version_from_hash(&self, hash: &str) -> Result<Version, Box<dyn Error>> {
+    pub fn update_version_from_hash(&self, hash: &str) -> Result<Version, Box<dyn Error>> {
         let modrinth = Ferinth::default();
 
-        let version = modrinth.get_version_from_hash(hash).await?;
+        let version = self.rt.block_on(modrinth.get_version_from_hash(hash))?;
 
         let version_json = serde_json::to_string(&version)?;
         let path = self.cache_dir.join("versions").join(format!("{}.json", version.id));
@@ -119,12 +129,12 @@ impl Cache {
         Ok(version)
     }
 
-    pub async fn get_versions_from_hashes(&self, hashes: Vec<String>) -> HashMap<String, Version> {
+    pub fn get_versions_from_hashes(&self, hashes: Vec<String>) -> HashMap<String, Version> {
         // println!("{:#?}", hashes);
         let mut sha1_to_version = HashMap::new();
 
         for hash in &hashes {
-            if let Ok(version) = self.get_version_from_hash(hash).await {
+            if let Ok(version) = self.get_version_from_hash(hash) {
                 sha1_to_version.insert(hash.to_owned(), version);
             }
         }
@@ -132,11 +142,11 @@ impl Cache {
         sha1_to_version
     }
 
-    pub async fn update_versions_from_hashes(&self, hashes: Vec<String>) -> HashMap<String, Version> {
+    pub fn update_versions_from_hashes(&self, hashes: Vec<String>) -> HashMap<String, Version> {
         let mut sha1_to_version = HashMap::new();
 
         for hash in &hashes {
-            if let Ok(version) = self.update_version_from_hash(hash).await {
+            if let Ok(version) = self.update_version_from_hash(hash) {
                 sha1_to_version.insert(hash.to_owned(), version);
             }
         }

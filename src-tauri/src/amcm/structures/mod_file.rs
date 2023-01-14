@@ -1,14 +1,17 @@
-use std::{path::{Path, PathBuf}, error::Error, fs};
+use std::{path::Path, error::Error, fs};
 
+use ferinth::structures::version::Version;
 use serde::{Deserialize, Serialize};
+use tokio::task;
 
 use crate::{utils::file, amcm::cache::CACHE, amcm::AMCM_DIR};
 
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, Hash, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ModFile {
     pub path: String,
     pub filename: String,
     pub sha1: String,
+    pub remote_version: Option<Version>,
     pub enabled: bool,
 }
 
@@ -18,27 +21,44 @@ impl ModFile {
             path: String::from(""),
             filename: String::from(""),
             sha1: String::from(""),
+            remote_version: None,
             enabled: true,
         }
     }
 
     pub fn of<P: AsRef<Path>>(path: P) -> ModFile {
+        use std::time::Instant;
+        let time_start = Instant::now();
         let path = path.as_ref();
         let filename = String::from(path.file_name().unwrap().to_str().unwrap());
         let sha1 = file::get_file_sha1(path.to_str().unwrap());
         let enabled = path.extension().unwrap() == "jar";
+        println!("       get file attributes cost: {:#?}", time_start.elapsed());
 
+        let time_start1 = Instant::now();
+        let cache = task::block_in_place(|| {
+            CACHE.blocking_lock()
+        });
+        let remote_version = match cache.get_cached_version_from_hash(&sha1) {
+            Ok(version) => Some(version),
+            Err(_) => None,
+        };
+        println!("       get_remote_version cost: {:#?}", time_start1.elapsed());
+
+        println!("   mod_file_of cost: {:#?}", time_start.elapsed());
         ModFile {
             path: String::from(path.to_str().unwrap()),
             filename,
             sha1,
+            remote_version,
             enabled,
         }
     }
 
     pub fn enable(&self) -> Result<(), String> {
         use std::time::Instant;
-        if (self.enabled == true) {
+
+        if self.enabled {
             return Ok(());
         }
 
@@ -56,10 +76,9 @@ impl ModFile {
     }
 
     pub fn disable(&self) -> Result<(), String> {
-        use std::fs;
         use std::time::Instant;
 
-        if (self.enabled == false) {
+        if !self.enabled {
             return Ok(());
         }
 
@@ -77,7 +96,7 @@ impl ModFile {
     }
 
     pub async fn move_to_storage(&self) -> Result<(), Box<dyn Error>> {
-        let version = CACHE.lock().await.get_version_from_hash(&self.sha1).await?;
+        let version = CACHE.lock().await.get_version_from_hash(&self.sha1)?;
         let dst = AMCM_DIR
             .join("storage")
             .join("mods")

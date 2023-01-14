@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api";
-import type { ModFile } from "./typing/typing";
+import type { ModFile } from "../typing/typing";
 
 export async function getLocalModFiles() {
     return await invoke<ModFile[]>("get_local_mod_files");
@@ -13,10 +13,3 @@ export async function getVersionsFromHash(hash: string) {
     return await invoke<any>("get_version_from_hash", {hash: hash});
 }
 
-export async function enableModFile(hash: string) {
-    return await invoke("enable_mod_file", {hash: hash});
-}
-
-export async function disableModFile(hash: string) {
-    return await invoke("disable_mod_file", {hash: hash});
-}

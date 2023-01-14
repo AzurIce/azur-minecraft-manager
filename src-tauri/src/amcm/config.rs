@@ -16,7 +16,7 @@ lazy_static! {
 
         if let Err(err) = config.load() {
             println!("[ERROR] Init config: {}, initializing default config...", err);
-            config.save();
+            config.save().expect("cannot save config");
         }
 
         Mutex::new(config)
@@ -76,11 +76,11 @@ impl Config {
 
     pub fn add_target(&mut self, target: Target) {
         self.targets.push(target);
-        self.save();
+        self.save().expect("cannot save config");
     }
     pub fn del_target(&mut self, index: usize) {
         self.targets.remove(index);
-        self.save();
+        self.save().expect("cannot save config");
     }
 
     pub fn save(&self) -> Result<(), Box<dyn Error>> {

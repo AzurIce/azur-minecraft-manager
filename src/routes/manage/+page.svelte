@@ -4,46 +4,45 @@
   import { Tabs, TabItem, Button, Spinner } from "flowbite-svelte";
   import { invoke } from "@tauri-apps/api";
   import { join } from "@tauri-apps/api/path";
+  import { onDestroy, onMount } from "svelte";
+  import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
+  import { getTarget } from "$lib/apis/target";
+  import { updateModFiles, watchModFiles } from "$lib/apis/mod_file";
 
   import LocalModFileCard from "$lib/components/LocalModFileCard.svelte";
 
   import { targetIndex } from "$lib/stores";
+    import ModSourceCard from "$lib/components/ModSourceCard.svelte";
   $: index = $targetIndex;
   let target: Target = {
     kind: TargetType.Local,
     location: "",
     mod_sources: new Array(),
   };
-  $: targetType = target.kind;
-  $: targetPath = target.location;
+  
+  let modFiles: Array<ModFile> = [];
+  $: localModFiles = modFiles.filter((modFile) => !modFile.remote_version)
+  $: remoteModFiles = modFiles.filter((modFile) => modFile.remote_version)
 
-
-  import { getLocalModFiles, getVersionsFromHashes } from "$lib/api";
-  // let updatingData = false;
-  import { onDestroy, onMount } from "svelte";
-  import { afterNavigate, beforeNavigate } from "$app/navigation";
-
-  let localModFiles: Array<ModFile> = [];
   let unlisten: UnlistenFn;
+  let loading = true;
   onMount(async () => {
     console.log("-> onMount");
 
     console.log("    getting target...");
-    target = await invoke("get_target", { index: index });
-    console.log(target.mod_sources);
+    target = await getTarget(index);
 
-    console.log("    getting localModFiles...");
-    localModFiles = await invoke("update_local_mod_files", { dir: await join(target.location, "mods") });
-
-    console.log("    starting localModFiles watch...");
-    listen<Array<any>>("mod_files_updated", (event) => {
+    console.log("    starting modFiles watch...");
+    unlisten = await listen<Array<any>>("mod_files_updated", (event) => {
       console.log("mod_files_updated");
-      // console.log(event.payload);
-      localModFiles = event.payload;
-    }).then((res) => {
-      unlisten = res;
-      invoke("target_watch_mod_files", { index: index });
+      modFiles = event.payload;
     });
+    await watchModFiles(target.location);
+
+    console.log("    updating mod files...");
+    modFiles = await updateModFiles(target.location);
+    loading = false;
+
 
     console.log("<- onMount");
   });
@@ -54,18 +53,6 @@
     emit("unwatch_mod_files");
   });
 
-  let loading = true;
-  import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
-
-  function test() {
-    invoke("test");
-    // invoke("get_belonged_mod_file", {
-    //   path: await join(targetPath, "mods", "appleskin-fabric-mc1.19-2.4.1.jar"),
-    // }).then((res) => {
-    //   console.log(res);
-    //   console.log(res as ModFile);
-    // });
-  }
 
   enum Tab {
     RemoteMod = "远端 Mod",
@@ -77,18 +64,14 @@
 
   let selectedTab = Tab.RemoteMod;
   $: tabs = Object.values(Tab);
-
-  // console.log(Object.keys(Tab));
-  // let tab = 1;
 </script>
 
 <div class="flex flex-col flex-1 bg-white p-4 gap-2">
-  <Button on:click={test} />
   <Breadcrumb aria-label="Default breadcrumb example">
     <BreadcrumbItem href="/" home>主页</BreadcrumbItem>
     <BreadcrumbItem>管理</BreadcrumbItem>
   </Breadcrumb>
-  {targetPath}
+  <!-- {targetPath} -->
   <Tabs contentClass="">
     {#each tabs as tab, i}
       {#if i == 0}
@@ -118,15 +101,15 @@
           <Spinner class="mr-3" size="4" />更新 Modrinth 信息
         </Button>
       {:else} -->
-        <!-- <Button on:click={() => {}}>更新 Modrinth 信息</Button> -->
+      <!-- <Button on:click={() => {}}>更新 Modrinth 信息</Button> -->
       <!-- {/if} -->
     </div>
     <div class="w-full overflow-y-auto flex flex-col gap-1">
       <!-- {#if loading}Loading...{:else} -->
-        {#each target.mod_sources as mod_source}
-          {mod_source}
-          <!-- <LocalModFileCard {file} /> -->
-        {/each}
+      {#each target.mod_sources as mod_source}
+        <ModSourceCard modSource={mod_source}/>
+        <!-- <LocalModFileCard {file} /> -->
+      {/each}
       <!-- {/if} -->
     </div>
   {:else if selectedTab == Tab.LocalMod}
@@ -136,17 +119,17 @@
           <Spinner class="mr-3" size="4" />更新 Modrinth 信息
         </Button>
       {:else} -->
-        <Button on:click={() => {}}>更新 Modrinth 信息</Button>
+      <Button on:click={() => {}}>更新 Modrinth 信息</Button>
       <!-- {/if} -->
     </div>
     <div class="w-full overflow-y-auto flex flex-col gap-1">
-      <!-- {#if loading}Loading...{:else} -->
-        {#each localModFiles as file (file.sha1)}
-          <LocalModFileCard {file} />
-        {/each}
-      <!-- {/if} -->
+      {#if loading}Loading...{:else}
+      {#each localModFiles as file (file.sha1)}
+        <LocalModFileCard {file} />
+      {/each}
+      {/if}
     </div>
-  <!-- {:else if selectedTab == Tab.Settings}
+    <!-- {:else if selectedTab == Tab.Settings}
     {selectedTab}
   {:else if selectedTab == Tab.Users}
     {selectedTab}

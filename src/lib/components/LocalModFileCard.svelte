@@ -6,36 +6,19 @@
     Button,
     P,
     Spinner,
-    Dropdown,
-    DropdownItem,
-    Chevron,
     Tooltip,
   } from "flowbite-svelte";
-  import Toggle from "$lib/components/Toggle.svelte";
 
   export let file: ModFile;
-  let version: any;
-  let loadingVersion = true;
-  // let project: any;
-  // let checked = true;
+  $: version = file.remote_version;
+  // let loadingVersion = true;
 
   import { afterUpdate, beforeUpdate, onDestroy, onMount } from "svelte";
   import { invoke } from "@tauri-apps/api";
-  import { disableModFile, enableModFile } from "$lib/api";
+  import { disableModFile, enableModFile } from "$lib/apis/mod_file";
     import { targetIndex } from "$lib/stores";
 
-  onMount(() => {
-    invoke("get_version_from_hash", { hash: file.sha1 })
-      .then((res) => {
-        version = res;
-      })
-      .catch((err) => {
-        // console.error(err);
-      })
-      .finally(() => {
-        loadingVersion = false;
-      });
-  });
+  onMount(() => {});
 </script>
 
 <div
@@ -47,19 +30,15 @@
   <!-- <div class="flex items-center justify-center gap-2"> -->
   <P>{file.filename}</P>
 
-  {#if loadingVersion}
+  <!-- {#if loadingVersion}
     <span
       class="inline-flex items-center px-2 py-1 rounded
       text-xs bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300 gap-2"
     >
       Loading<Spinner size="3" />
     </span>
-  {:else if version}
-    <!-- <Badge
-      on:click={() => {
-        console.log("clicked");
-      }}>Modrinth | +</Badge
-    > -->
+  {:else  -->
+  {#if version}
     <button
       class="inline-flex items-center px-2 py-1 rounded
       text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300
@@ -97,16 +76,6 @@
     </span>
   {/if}
   <div class="flex-1" />
-  <!-- <Toggle
-    checked={file.enabled}
-    on:click={() => {
-      if (file.enabled) {
-        disableModFile(file.sha1);
-      } else {
-        enableModFile(file.sha1);
-      }
-    }}
-  /> -->
   <ButtonGroup>
     {#if file.enabled}
       <Button
@@ -122,12 +91,6 @@
       </Button>
     {/if}
     <Button size="xs"><i class="ri-more-2-line" /></Button>
-    <!-- <Dropdown>
-      <DropdownItem>Add</DropdownItem>
-      <DropdownItem>Settings</DropdownItem>
-      <DropdownItem>Earnings</DropdownItem>
-      <DropdownItem>Sign out</DropdownItem>
-    </Dropdown> -->
   </ButtonGroup>
   <button on:click={() => {}} />
   <!-- </div> -->

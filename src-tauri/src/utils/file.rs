@@ -1,4 +1,3 @@
-use serde::{Serialize, Deserialize};
 use sha::sha1::Sha1;
 use sha::utils::{Digest, DigestExt};
 use std::{fs::{self, File}, io::{Read, Write}};

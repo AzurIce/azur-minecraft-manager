@@ -17,10 +17,10 @@ fn add_mod_source_from_local_mod_file() {
     let mod_file_hash = "7bd52695e82b1ddd1fdb3320154b68bf48dfff37".to_owned();
 
     let rt = tokio::runtime::Runtime::new().unwrap();
-    rt.block_on(
+    // rt.block_on(
         DATA.blocking_lock()
-            .update_local_mod_files("G:\\_MC\\__HMCL__\\.minecraft\\mods"),
-    );
+            .update_mod_files("G:\\_MC\\__HMCL__\\.minecraft\\mods");
+    // );
     rt.block_on(mod_source::add_mod_source_from_local_mod_file(
         project_id,
         version_id,

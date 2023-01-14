@@ -7,6 +7,8 @@ pub mod cache;
 
 #[cfg(test)]
 mod cache_test;
+#[cfg(test)]
+mod data_test;
 
 use std::path::PathBuf;
 use std::env;

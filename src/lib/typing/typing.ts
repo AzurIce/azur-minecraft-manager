@@ -44,6 +44,7 @@ export interface ModFile {
     filename: string, // From file
     path: string,
     sha1: string,
+    remote_version: any,
     enabled: boolean,
 
     // belong_mod: Mod, // From sha1 + modrinth API

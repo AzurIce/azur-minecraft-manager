@@ -1,8 +1,7 @@
 
-use crate::{utils::file, amcm::{AMCM_DIR, cache::CACHE}};
-use ferinth::{Ferinth, structures::project::Project};
+use crate::amcm::{AMCM_DIR, cache::CACHE};
+use ferinth::structures::project::Project;
 use serde::{Deserialize, Serialize};
-use futures::executor;
 
 use std::{path::PathBuf, error::Error};
 lazy_static! {
@@ -10,7 +9,7 @@ lazy_static! {
 }
 
 // ModSource //
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, Hash, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type")]
 pub enum ModSource {
 	Modrinth(ModrinthModSource),
@@ -34,7 +33,7 @@ impl ModSource {
 }
 
 // ModrinthModSource //
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, Hash, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ModrinthModSource {
     pub project_id: String,
 }
@@ -49,10 +48,10 @@ impl ModrinthModSource {
     }
 
     pub async fn get_mod_source_info(&self) -> Result<Project, Box<dyn Error>> {
-        CACHE.lock().await.get_project(&self.project_id).await
+        CACHE.lock().await.get_project(&self.project_id)
     }
 
     pub async fn update_mod_source_info(&self) -> Result<Project, Box<dyn Error>> {
-        CACHE.lock().await.update_project(&self.project_id).await
+        CACHE.lock().await.update_project(&self.project_id)
     }
 }
