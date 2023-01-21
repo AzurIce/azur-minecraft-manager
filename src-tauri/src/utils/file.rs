@@ -11,7 +11,6 @@ pub fn get_file_sha1<P: AsRef<Path>>(path: P) -> String {
 }
 
 // exist //
-#[tauri::command]
 pub fn is_path_exist<P: AsRef<Path>>(path: P) -> bool {
     return fs::try_exists(path).unwrap_or(false);
 }

@@ -1,130 +1,110 @@
 <script lang="ts">
-    import type { ModFile, Mod, ModSource } from "$lib/typing/typing";
-    import { Badge, P, Img } from "flowbite-svelte";
-    import Toggle from "$lib/components/Toggle.svelte";
-  
-    enum BelongState {
-      Unknown = "Unknown",
-      Modrinth = "Modrinth",
-    }
-  
-    export let modSource: any;
-  
-    import { afterUpdate, beforeUpdate, onDestroy, onMount } from "svelte";
-    import { invoke } from "@tauri-apps/api";
-    import { getProject } from "$lib/apis/project";
-  
-    let version: any = {
-      game_versions: [],
-    };
-    let project: any = {
-      title: "",
-      description: "",
-      icon_url: "",
-      client_side: "",
-      server_side: "",
-    };
-  
-    onMount(async () => {
-        project = await getProject(modSource.project_id);
-        console.log(project);
-    });
-  
-    afterUpdate(async () => {
-    });
-  
-  </script>
-  
-  <div
-    class="p-3 flex items-center {true
-      ? 'bg-white'
-      : 'bg-gray-50'} rounded-md shadow-sm border"
-  >
-    <div class="flex flex-col gap-1 flex-1">
-      <div class="flex items-center gap-2">
-        <!-- {#if file.belong_state == BelongState.Modrinth}
-          <P>{project.title}</P>
-          <Badge>Modrinth</Badge>
-        {:else} -->
-          <P>{project.title}</P>
-          <Badge color="dark">Modrinth</Badge>
-        <!-- {/if} -->
-        <!-- <span class="badge ml-2" v-if="isFabricMod">Fabric</span> -->
-        <!-- <span class="badge badge-error ml-2" v-if="isBadJsonSyntax">BadJsonSyntax</span> -->
-      </div>
-      <!-- {#if file.belong_state == BelongState.Modrinth} -->
-        <div class="flex flex-1 h-16 overflow-hidden mt-1 mb-2">
-          <!-- <div class="avatar">
-            <div class="w-16 rounded">
-              <img alt="project_icon" src={project.icon_url} />
-            </div>
-          </div> -->
-          <Img
-            class="w-16 h-16 bg-gray-200 rounded text-center flex-none"
-            src={project.icon_url}
-          />
-          <div
-            class="flex flex-col flex-1 h-16 overflow-x-hidden overflow-y-auto"
-          >
-            <p class="ml-2 break-all text-sm">{project.description}</p>
-          </div>
-        </div>
-        <div class="flex gap-1">
-          {#if project.client_side == "required"}
-            <!-- <div class="badge">Client</div> -->
-            <Badge color="red">Client</Badge>
-          {:else if project.client_side == "optional"}
-            <Badge color="red">Client</Badge>
-          {:else}
-            <Badge color="dark">Client: Unsupported</Badge>
-          {/if}
-  
-          {#if project.server_side == "required"}
-            <Badge color="red">Server: Required</Badge>
-          {:else if project.server_side == "optional"}
-            <Badge>Server: Optional</Badge>
-          {:else}
-            <Badge color="dark">Server: Unsupported</Badge>
-          {/if}
-        </div>
-      <!-- {/if} -->
-      <!-- <span class="text-gray-400">modId: {{ modId }}</span> -->
+  import {
+    Badge,
+    P,
+    Img,
+    Dropdown,
+    DropdownItem,
+    Chevron,
+    Button,
+    ButtonGroup,
+    Tooltip,
+  } from "flowbite-svelte";
+
+  export let modSource: any;
+  export let curModFile: any;
+
+  import { onMount } from "svelte";
+  import { getProject } from "$lib/apis/project";
+  import {
+    getVersion,
+    getVersions,
+    getVersionsFromHash,
+  } from "$lib/apis/version";
+  import Toggle from "./Toggle.svelte";
+  import ModVersionModal from "./ModVersionModal.svelte";
+
+  let project: any = {
+    title: "",
+    description: "",
+    icon_url: "",
+    client_side: "",
+    server_side: "",
+    versions: [],
+  };
+
+  // $: console.log(curModFile);
+
+  onMount(async () => {
+    project = await getProject(modSource.project_id);
+    // console.log(project);
+  });
+
+  let show: boolean = true;
+</script>
+
+<div
+  class="p-3 flex items-center {true
+    ? 'bg-white'
+    : 'bg-gray-50'} rounded-md shadow-sm border"
+>
+  <div class="flex flex-col gap-1 flex-1">
+    <!-- head -->
+    <div class="flex items-center gap-2">
+      <P>{project.title}</P>
+      <Badge color="dark">Modrinth</Badge>
     </div>
-    <div class="w-20 flex-none flex flex-col items-center">
-      <!-- <Toggle checked={true}></Toggle> -->
-      <Toggle
-        checked={true}
-        on:click={() => {
-        }}
+
+    <!-- mid -->
+    <div class="flex flex-1 h-16 items-center overflow-hidden mt-1 mb-2 gap-2">
+      <Img
+        class="w-16 h-16 bg-gray-200 rounded text-center flex-none"
+        src={project.icon_url}
       />
-      <!-- // TODO: create my own toggle -->
-      <!-- <input
-        id="enableToggle"
-        type="checkbox"
-        class="toggle"
-        checked={file.enabled}
-        
-      /> -->
-    </div>
-  
-    <!-- <div class="flex-1" /> -->
-  
-    <!-- <div class="dropdown dropdown-end m-1">
-      <div class="indicator">
-        <span class="indicator-item badge badge-success" />
-        <div class="tooltip" data-tip="New Version">
-          <label tabindex="0" class="btn">Version</label>
-        </div>
-      </div>
-      <ul
-        tabindex="0"
-        class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+
+      <div
+        class="flex flex-col flex-1 h-16 overflow-x-hidden overflow-y-auto justify-center"
       >
-        <li><a>Item 1</a></li>
-        <li><a>Item 2</a></li>
-      </ul>
+        <Button color="light" on:click={() => {show = true;}}>
+          当前版本：{curModFile.remote_version.name}
+        </Button>
+      </div>
+
+      
+      <ButtonGroup>
+        {#if true}
+          <Button size="xs" color="green" on:click={() => {}}>
+            <i class="ri-check-line" />
+          </Button>
+        {:else}
+          <Button size="xs" color="red" on:click={() => {}}>
+            <i class="ri-close-line" />
+          </Button>
+        {/if}
+        <Button size="xs"><i class="ri-more-2-line" /></Button>
+      </ButtonGroup>
     </div>
-  
-    <input type="checkbox" class="checkbox" v-model="checked" /> -->
+
+    <!-- foot -->
+    <div class="flex gap-1">
+      {#if project.client_side == "required"}
+        <Badge color="red">Client</Badge>
+      {:else if project.client_side == "optional"}
+        <Badge color="red">Client</Badge>
+      {:else}
+        <Badge color="dark">Client: Unsupported</Badge>
+      {/if}
+
+      {#if project.server_side == "required"}
+        <Badge color="red">Server: Required</Badge>
+      {:else if project.server_side == "optional"}
+        <Badge>Server: Optional</Badge>
+      {:else}
+        <Badge color="dark">Server: Unsupported</Badge>
+      {/if}
+    </div>
   </div>
-  
+  {#if project.versions.length > 0}
+  <ModVersionModal bind:show={show} {project} {curModFile}/>
+  {/if}
+</div>

@@ -27,6 +27,11 @@ fn main() {
             
             cmd::version::get_version_from_hash,
             cmd::version::get_versions_from_hashes,
+            cmd::version::get_version,
+            cmd::version::get_versions,
+            cmd::version::is_version_downloaded,
+            cmd::version::download_version,
+            cmd::version::choose_version,
 
             cmd::project::get_project,
             cmd::project::update_project,

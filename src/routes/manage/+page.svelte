@@ -12,17 +12,21 @@
   import LocalModFileCard from "$lib/components/LocalModFileCard.svelte";
 
   import { targetIndex } from "$lib/stores";
-    import ModSourceCard from "$lib/components/ModSourceCard.svelte";
+  import ModSourceCard from "$lib/components/ModSourceCard.svelte";
   $: index = $targetIndex;
   let target: Target = {
     kind: TargetType.Local,
     location: "",
     mod_sources: new Array(),
   };
-  
+
   let modFiles: Array<ModFile> = [];
-  $: localModFiles = modFiles.filter((modFile) => !modFile.remote_version)
-  $: remoteModFiles = modFiles.filter((modFile) => modFile.remote_version)
+  $: localModFiles = modFiles.filter(
+    (modFile) => modFile.remote_version === null
+  );
+  $: remoteModFiles = modFiles.filter(
+    (modFile) => modFile.remote_version !== null
+  )
 
   let unlisten: UnlistenFn;
   let loading = true;
@@ -43,7 +47,6 @@
     modFiles = await updateModFiles(target.location);
     loading = false;
 
-
     console.log("<- onMount");
   });
 
@@ -52,7 +55,6 @@
     unlisten();
     emit("unwatch_mod_files");
   });
-
 
   enum Tab {
     RemoteMod = "远端 Mod",
@@ -95,21 +97,21 @@
 
   <!-- Tab Contents -->
   {#if selectedTab == Tab.RemoteMod}
-    <div class="w-full bg-white border rounded-md p-2">
-      <!-- {#if updatingData}
-        <Button disabled>
-          <Spinner class="mr-3" size="4" />更新 Modrinth 信息
-        </Button>
-      {:else} -->
-      <!-- <Button on:click={() => {}}>更新 Modrinth 信息</Button> -->
-      <!-- {/if} -->
-    </div>
     <div class="w-full overflow-y-auto flex flex-col gap-1">
       <!-- {#if loading}Loading...{:else} -->
-      {#each target.mod_sources as mod_source}
-        <ModSourceCard modSource={mod_source}/>
-        <!-- <LocalModFileCard {file} /> -->
-      {/each}
+      {#if target.mod_sources.length > 0}
+      <ModSourceCard modSource={target.mod_sources[0]} curModFile={remoteModFiles.find(
+            (e) => e.remote_version.project_id === target.mod_sources[0].project_id
+          ) || { remote_version: { name: "" } }}/>
+      {/if}
+      <!-- {#each target.mod_sources as mod_source}
+        <ModSourceCard
+          modSource={mod_source}
+          curModFile={remoteModFiles.find(
+            (e) => e.remote_version.project_id === mod_source.project_id
+          ) || { remote_version: { name: "" } }}
+        />
+      {/each} -->
       <!-- {/if} -->
     </div>
   {:else if selectedTab == Tab.LocalMod}
@@ -124,9 +126,9 @@
     </div>
     <div class="w-full overflow-y-auto flex flex-col gap-1">
       {#if loading}Loading...{:else}
-      {#each localModFiles as file (file.sha1)}
-        <LocalModFileCard {file} />
-      {/each}
+        {#each localModFiles as file (file.sha1)}
+          <LocalModFileCard {file} />
+        {/each}
       {/if}
     </div>
     <!-- {:else if selectedTab == Tab.Settings}

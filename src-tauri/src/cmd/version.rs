@@ -1,7 +1,8 @@
-use crate::amcm::cache::CACHE;
+use crate::{amcm::{AMCM_DIR, cache::CACHE}, utils::file};
 
 use ferinth::structures::version::Version;
 use std::collections::HashMap;
+use tokio::task;
 
 #[tauri::command]
 pub async fn get_version_from_hash(hash: String) -> Result<Version, String> {
@@ -20,4 +21,43 @@ pub async fn get_version_from_hash(hash: String) -> Result<Version, String> {
 #[tauri::command]
 pub async fn get_versions_from_hashes(hashes: Vec<String>) -> HashMap<String, Version> {
     CACHE.lock().await.get_versions_from_hashes(hashes)
+}
+
+#[tauri::command]
+pub async fn get_version(id: String) -> Result<Version, String> {
+    task::block_in_place(|| match CACHE.blocking_lock().get_version(&id) {
+        Ok(version) => Ok(version),
+        Err(err) => Err(format!("{}", err)),
+    })
+}
+
+#[tauri::command]
+pub async fn get_versions(ids: Vec<String>) -> Result<Vec<Version>, String> {
+    task::block_in_place(|| match CACHE.blocking_lock().get_versions(ids) {
+        Ok(versions) => Ok(versions),
+        Err(err) => Err(format!("{}", err)),
+    })
+}
+
+#[tauri::command]
+pub async fn is_version_downloaded(id: String) -> Result<bool, String> {
+    task::block_in_place(move || {
+        match CACHE.blocking_lock().get_version(id.as_str()) {
+            Ok(version) => {
+                let path = AMCM_DIR
+                    .join("storage")
+                    .join("mods")
+                    .join(version.project_id)
+                    .join(format!("{}.jar", version.id));
+                Ok(file::is_path_exist(path))
+            }
+            Err(err) => Err(format!("{}", err)),
+        }
+    })
+}
+
+#[tauri::command]
+pub async fn download_version(id: String) -> Result<(), String>{
+    // TODO:
+    Ok(())
 }

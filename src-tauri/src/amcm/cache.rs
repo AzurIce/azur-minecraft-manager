@@ -1,13 +1,16 @@
-use std::{path::PathBuf, collections::HashMap, error::Error};
+use std::{collections::HashMap, error::Error, path::PathBuf};
 
-use ferinth::{structures::{project::Project, version::Version}, Ferinth};
+use ferinth::{
+    structures::{project::Project, version::Version},
+    Ferinth,
+};
 
 use crate::utils::file;
 
 use super::AMCM_DIR;
 
-use tokio::sync::Mutex;
 use tokio::runtime::Runtime;
+use tokio::sync::Mutex;
 lazy_static! {
     pub static ref CACHE: Mutex<Cache> = Mutex::new(Cache::default());
 }
@@ -44,7 +47,7 @@ impl Cache {
         let project = self.rt.block_on(modrinth.get_project(id))?;
         let project_json = serde_json::to_string(&project)?;
         file::write_str(path, &project_json)?;
-        
+
         Ok(project)
     }
 
@@ -74,18 +77,26 @@ impl Cache {
         let version = self.rt.block_on(modrinth.get_version(id))?;
         let version_json = serde_json::to_string(&version)?;
         file::write_str(path, &version_json)?;
-        
+
         Ok(version)
     }
 
-    pub fn get_versions(&self, ids: Vec<String>) -> Vec<Version> {
-        let mut versions = Vec::new();
-        for id in &ids {
-            if let Ok(version) = self.get_version(id) {
-                versions.push(version);
-            }
+    pub fn get_versions(&self, ids: Vec<String>) -> Result<Vec<Version>, Box<dyn Error>> {
+        let modrinth = Ferinth::default();
+        let ids: Vec<&str> = ids.iter().map(|s| &s[..]).collect();
+
+        let versions = self.rt.block_on(
+            modrinth.get_multiple_versions(&ids),
+        )?;
+        for version in &versions {
+            let path = self
+                .cache_dir
+                .join("versions")
+                .join(format!("{}.json", version.id));
+            let version_json = serde_json::to_string(&version)?;
+            file::write_str(path, &version_json)?;
         }
-        versions
+        Ok(versions)
     }
 
     pub fn update_versions(&self, ids: Vec<String>) -> Vec<Version> {
@@ -120,12 +131,15 @@ impl Cache {
         let version = self.rt.block_on(modrinth.get_version_from_hash(hash))?;
 
         let version_json = serde_json::to_string(&version)?;
-        let path = self.cache_dir.join("versions").join(format!("{}.json", version.id));
+        let path = self
+            .cache_dir
+            .join("versions")
+            .join(format!("{}.json", version.id));
         file::write_str(path, &version_json)?;
 
         let path = self.cache_dir.join("sha1-version").join(hash);
         file::write_str(path, &version.id)?;
-        
+
         Ok(version)
     }
 

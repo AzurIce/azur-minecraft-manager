@@ -26,3 +26,9 @@ pub async fn del_target(index: usize) -> Vec<Target> {
     CONFIG.lock().await.del_target(index);
     get_targets().await
 }
+
+#[tauri::command]
+pub async fn choose_version_for_target(version_id: String, target_id: usize) -> Result<(), String>{
+    // TODO:
+    Ok(())
+}

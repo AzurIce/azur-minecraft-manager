@@ -12,6 +12,7 @@ lazy_static! {
 use notify::{recommended_watcher, RecommendedWatcher, RecursiveMode, Watcher};
 use tauri::Window;
 use tokio::runtime::Runtime;
+use tokio::task;
 pub struct Core {
     notify_watcher: Option<RecommendedWatcher>,
 }
@@ -35,11 +36,10 @@ impl Core {
             Ok(event) => {
                 // Get data lock
                 let mut data = DATA.blocking_lock();
-                
+
                 // Update mod file
                 let path = event.paths.last().unwrap();
-                if path.extension().unwrap() != "jar" && path.extension().unwrap() != "disabled"
-                {
+                if path.extension().unwrap() != "jar" && path.extension().unwrap() != "disabled" {
                     return Ok(());
                 }
                 let kind = event.kind;
@@ -106,13 +106,15 @@ impl Core {
 
         // Listen to unwatch once
         window.once("unwatch_mod_files", move |_| {
-            let mut amcm = CORE.blocking_lock();
-            let path = Path::new(dir.as_str());
-            amcm.notify_watcher
-                .as_mut()
-                .unwrap()
-                .unwatch(path)
-                .expect("Mod files unwatch failed");
+            task::block_in_place(|| {
+                let mut amcm = CORE.blocking_lock();
+                let path = Path::new(dir.as_str());
+                amcm.notify_watcher
+                    .as_mut()
+                    .unwrap()
+                    .unwatch(path)
+                    .expect("Mod files unwatch failed");
+            })
         });
 
         println!("<- amcm/core.rs/watch_mod_files");
