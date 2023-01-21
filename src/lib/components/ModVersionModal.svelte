@@ -26,7 +26,7 @@
   export let curModFile: any;
 
   let versions = new Array<any>();
-  let curVersion: any = { sha1: "" };
+  // let curVersion: any = { sha1: "" };
 
   $: {
     console.log("project changed, updating versions");
@@ -34,12 +34,12 @@
       versions = res;
     });
   }
-  $: {
-    console.log("curModFile changed, updating curVersion");
-    getVersionsFromHash(curModFile.sha1).then((res) => {
-      curVersion = res;
-    });
-  }
+  // $: {
+  //   console.log("curModFile changed, updating curVersion");
+  //   getVersionsFromHash(curModFile.sha1).then((res) => {
+  //     curVersion = res;
+  //   });
+  // }
 
   onMount(async () => {
     // versions = await getVersions(project.versions);
@@ -52,7 +52,7 @@
 <Modal title="管理版本" bind:open={show} class="flex">
   <!-- <div class="flex flex-col h-80 overflow-y-auto"> -->
   {#each versions as version}
-    <ModVersionCard {version} {curVersion}/>
+    <ModVersionCard {version} {curModFile}/>
   {/each}
   <!-- </div> -->
 </Modal>

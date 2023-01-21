@@ -39,6 +39,7 @@ fn main() {
             cmd::mod_file::get_mod_files,
             cmd::mod_file::update_mod_files,
             cmd::mod_file::remove_mod_file,
+            cmd::mod_file::delete_mod_file,
             cmd::mod_file::enable_mod_file,
             cmd::mod_file::disable_mod_file,
             cmd::mod_file::watch_mod_files,

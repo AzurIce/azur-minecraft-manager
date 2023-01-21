@@ -40,7 +40,7 @@
     // console.log(project);
   });
 
-  let show: boolean = true;
+  let show: boolean = false;
 </script>
 
 <div

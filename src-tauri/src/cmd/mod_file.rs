@@ -3,6 +3,8 @@ use crate::amcm::core::CORE;
 use crate::amcm::structures::mod_file::ModFile;
 
 use tauri::Window;
+use tokio::task;
+use std::fs;
 
 #[tauri::command]
 pub async fn enable_mod_file(hash: String) -> Result<(), String> {
@@ -24,10 +26,23 @@ pub async fn disable_mod_file(hash: String) -> Result<(), String> {
 
 #[tauri::command]
 pub async fn remove_mod_file(hash: String) -> Result<(), String> {
-    match DATA.lock().await.remove_mod_file_from_hash(hash) {
-        Ok(_) => Ok(()),
-        Err(err) => Err(format!("{}", err)),
-    }
+    task::block_in_place(|| {
+        match DATA.blocking_lock().remove_mod_file_from_hash(hash) {
+            Ok(_) => Ok(()),
+            Err(err) => Err(format!("{}", err)),
+        }
+    })
+}
+
+#[tauri::command]
+pub async fn delete_mod_file(hash: String) -> Result<(), String> {
+    task::block_in_place(|| {
+        let mod_file = DATA.blocking_lock().get_mod_file_from_hash(hash).unwrap();
+        match fs::remove_file(mod_file.path) {
+            Ok(_) => Ok(()),
+            Err(err) => Err(format!("{}", err))
+        }
+    })
 }
 
 #[tauri::command]

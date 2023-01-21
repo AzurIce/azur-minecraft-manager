@@ -1,16 +1,24 @@
 <script lang="ts">
-  import { getIsVersionDownloaded } from "$lib/apis/version";
+  import { getIsVersionDownloaded, getVersion, getVersionsFromHash } from "$lib/apis/version";
     import { targetIndex } from "$lib/stores";
   import { invoke } from "@tauri-apps/api";
   import { Badge, P, Spinner } from "flowbite-svelte";
 
   export let version: any;
-  export let curVersion: any;
+  export let curModFile: any;
+  let curVersion: any;
 
   enum State {
     NotDownloaded,
     Downloaded,
     Choosed,
+  }
+
+  $: {
+    console.log("curModFile changed, updating curVersion");
+    getVersionsFromHash(curModFile.sha1).then((res) => {
+      curVersion = res;
+    });
   }
 
   $: state = downloaded
@@ -33,7 +41,7 @@
   {state == State.Choosed
     ? 'border-sky-400 bg-sky-200 text-gray-700'
     : state == State.Downloaded
-    ? 'text-gray-700'
+    ? 'text-gray-700 transition hover:border-gray-400 hover:cursor-pointer'
     : state == State.NotDownloaded
     ? 'transition hover:border-gray-400 hover:cursor-pointer text-gray-300'
     : ''}"
@@ -43,10 +51,10 @@
         console.log(res);
       });
     } else if (state == State.Downloaded) {
-      invoke("remove_mod_file", {hash: curVersion.files[0].hashes.sha1}).then((res) => {
-        console.log(res);
-        invoke("copy_version_to_target", {version_id: version.id, target_id: $targetIndex}).then((res) => {
-          console.log(res);
+      invoke("delete_mod_file", {hash: curModFile.sha1}).then((res) => {
+        console.log("delete_mod_file:", res);
+        invoke("copy_version_to_target", {versionId: version.id, targetId: $targetIndex}).then((res) => {
+          console.log("copy_version_to_target", res);
         })
       })
     }

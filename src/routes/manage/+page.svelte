@@ -99,19 +99,19 @@
   {#if selectedTab == Tab.RemoteMod}
     <div class="w-full overflow-y-auto flex flex-col gap-1">
       <!-- {#if loading}Loading...{:else} -->
-      {#if target.mod_sources.length > 0}
+      <!-- {#if target.mod_sources.length > 0}
       <ModSourceCard modSource={target.mod_sources[0]} curModFile={remoteModFiles.find(
             (e) => e.remote_version.project_id === target.mod_sources[0].project_id
           ) || { remote_version: { name: "" } }}/>
-      {/if}
-      <!-- {#each target.mod_sources as mod_source}
+      {/if} -->
+      {#each target.mod_sources as mod_source}
         <ModSourceCard
           modSource={mod_source}
           curModFile={remoteModFiles.find(
             (e) => e.remote_version.project_id === mod_source.project_id
           ) || { remote_version: { name: "" } }}
         />
-      {/each} -->
+      {/each}
       <!-- {/if} -->
     </div>
   {:else if selectedTab == Tab.LocalMod}

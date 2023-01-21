@@ -40,7 +40,7 @@ pub async fn copy_version_to_target(version_id: String, target_id: usize) -> Res
         .join("mods")
         .join(version.project_id)
         .join(format!("{}.jar", version.id));
-        let dst = path::Path::new(&target.location).join("mods").join(format!("_amcm_{}",version.files.first().unwrap().filename));
+        let dst = path::Path::new(&target.location).join("mods").join(format!("amcm_{}",version.files.first().unwrap().filename));
         match fs::copy(src, dst) {
             Ok(_) => Ok(()),
             Err(err) => Err(format!("{}", err))
