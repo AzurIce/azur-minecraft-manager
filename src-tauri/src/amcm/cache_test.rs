@@ -3,14 +3,14 @@ use super::cache;
 use futures::executor;
 use tokio::runtime::Runtime;
 
-#[test]
-fn test_ferinth() {
-    // let rt = Runtime::new().unwrap();
-    let modrinth = ferinth::Ferinth::default();
-    let res = modrinth
-        .get_version_from_hash("7bd52695e82b1ddd1fdb3320154b68bf48dfff37");
-    println!("{:#?}", res);
-}
+// #[test]
+// fn test_ferinth() {
+//     // let rt = Runtime::new().unwrap();
+//     let modrinth = ferinth::Ferinth::default();
+//     let res = modrinth
+//         .get_version_from_hash("7bd52695e82b1ddd1fdb3320154b68bf48dfff37");
+//     println!("{:#?}", res);
+// }
 
 #[test]
 fn update_version_from_hash() {
