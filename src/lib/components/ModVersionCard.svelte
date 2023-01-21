@@ -1,5 +1,7 @@
 <script lang="ts">
   import { getIsVersionDownloaded } from "$lib/apis/version";
+    import { targetIndex } from "$lib/stores";
+  import { invoke } from "@tauri-apps/api";
   import { Badge, P, Spinner } from "flowbite-svelte";
 
   export let version: any;
@@ -37,9 +39,16 @@
     : ''}"
   on:click={() => {
     if (state == State.NotDownloaded) {
-
+      invoke("download_version", { id: version.id }).then((res) => {
+        console.log(res);
+      });
     } else if (state == State.Downloaded) {
-
+      invoke("remove_mod_file", {hash: curVersion.files[0].hashes.sha1}).then((res) => {
+        console.log(res);
+        invoke("copy_version_to_target", {version_id: version.id, target_id: $targetIndex}).then((res) => {
+          console.log(res);
+        })
+      })
     }
     // Download
   }}
@@ -47,7 +56,7 @@
 >
   <!-- head -->
   <!-- <div class="flex items-center gap-2"> -->
-    
+
   <!-- </div> -->
 
   <!-- mid -->
@@ -66,13 +75,15 @@
   <!-- foot -->
   <div class="flex flex-1 items-center gap-2">
     {#each version.game_versions as game_version}
-      <Badge color="{state == State.Choosed
-        ? 'blue'
-        : state == State.Downloaded
-        ? 'blue'
-        : state == State.NotDownloaded
-        ? 'dark'
-        : 'blue'}">{game_version}</Badge>
+      <Badge
+        color={state == State.Choosed
+          ? "blue"
+          : state == State.Downloaded
+          ? "blue"
+          : state == State.NotDownloaded
+          ? "dark"
+          : "blue"}>{game_version}</Badge
+      >
     {/each}
   </div>
 </div>

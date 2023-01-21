@@ -31,3 +31,9 @@ pub fn write_str<P: AsRef<Path>>(path: P, data: &str) -> Result<()> {
     file.write((*data).as_bytes())?;
     Ok(())
 }
+
+#[tauri::command]
+pub fn copy_file<P: AsRef<Path>>(src: P, dst: P) -> Result<()> {
+    fs::copy(src, dst)?;
+    Ok(())
+}

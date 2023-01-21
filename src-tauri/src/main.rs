@@ -24,6 +24,7 @@ fn main() {
             cmd::target::get_target,
             cmd::target::add_target,
             cmd::target::del_target,
+            cmd::target::copy_version_to_target,
             
             cmd::version::get_version_from_hash,
             cmd::version::get_versions_from_hashes,
@@ -31,7 +32,6 @@ fn main() {
             cmd::version::get_versions,
             cmd::version::is_version_downloaded,
             cmd::version::download_version,
-            cmd::version::choose_version,
 
             cmd::project::get_project,
             cmd::project::update_project,

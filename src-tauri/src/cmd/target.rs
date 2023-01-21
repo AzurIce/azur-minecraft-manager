@@ -1,4 +1,7 @@
-use crate::amcm::{target::Target, config::CONFIG};
+use crate::amcm::{target::Target, config::CONFIG, cache::CACHE, AMCM_DIR};
+
+use tokio::task;
+use std::{path, fs};
 
 #[tauri::command]
 pub async fn get_targets() -> Vec<Target> {
@@ -28,7 +31,19 @@ pub async fn del_target(index: usize) -> Vec<Target> {
 }
 
 #[tauri::command]
-pub async fn choose_version_for_target(version_id: String, target_id: usize) -> Result<(), String>{
-    // TODO:
-    Ok(())
+pub async fn copy_version_to_target(version_id: String, target_id: usize) -> Result<(), String>{
+    task::block_in_place(|| {
+        let target = CONFIG.blocking_lock().get_target(target_id).unwrap();
+        let version = CACHE.blocking_lock().get_version(&version_id).unwrap();
+        let src = AMCM_DIR
+        .join("storage")
+        .join("mods")
+        .join(version.project_id)
+        .join(format!("{}.jar", version.id));
+        let dst = path::Path::new(&target.location).join("mods").join(format!("_amcm_{}",version.files.first().unwrap().filename));
+        match fs::copy(src, dst) {
+            Ok(_) => Ok(()),
+            Err(err) => Err(format!("{}", err))
+        }
+    })
 }
