@@ -5,6 +5,7 @@ use crate::amcm::structures::mod_file::ModFile;
 use tauri::Window;
 use tokio::task;
 use std::fs;
+use std::path::Path;
 
 #[tauri::command]
 pub async fn enable_mod_file(hash: String) -> Result<(), String> {
@@ -52,6 +53,7 @@ pub async fn get_mod_files() -> Vec<ModFile> {
 
 #[tauri::command]
 pub async fn update_mod_files(dir: String) -> Vec<ModFile> {
+    let dir = Path::new(dir.as_str()).join(".minecraft").join("mods");
     DATA.lock().await.update_mod_files(dir)
 }
 

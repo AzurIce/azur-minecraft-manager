@@ -7,15 +7,16 @@
 pub mod mod_file;
 
 // Source
-pub mod mod_source;
-use mod_source::ModSource;
-enum Source {
-    Mod(ModSource),
-	// ResourcePackSource,
-	// ShaderPackSource,
-	// ...
-}
+// pub mod mod_source;
+// use mod_source::ModSource;
+// enum Source {
+//     Mod(ModSource),
+// 	// ResourcePackSource,
+// 	// ShaderPackSource,
+// 	// ...
+// }
 
+pub mod mods_json;
 
 // //----- ModFileBelong -----//
 // #[derive(Serialize, Deserialize, Debug)]

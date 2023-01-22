@@ -1,17 +1,17 @@
-use std::{path::Path, error::Error, fs};
+use std::{error::Error, fs, path::Path};
 
 use ferinth::structures::version::Version;
 use serde::{Deserialize, Serialize};
 use tokio::task;
 
-use crate::{utils::file, amcm::cache::CACHE, amcm::AMCM_DIR};
+use crate::{amcm::cache::CACHE, amcm::AMCM_DIR, utils::file};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ModFile {
     pub path: String,
     pub filename: String,
     pub sha1: String,
-    pub remote_version: Option<Version>,
+    // pub remote_version: Option<Version>,
     pub enabled: bool,
 }
 
@@ -21,38 +21,44 @@ impl ModFile {
             path: String::from(""),
             filename: String::from(""),
             sha1: String::from(""),
-            remote_version: None,
+            // remote_version: None,
             enabled: true,
         }
     }
 
     pub fn of<P: AsRef<Path>>(path: P) -> ModFile {
-        use std::time::Instant;
-        let time_start = Instant::now();
-        let path = path.as_ref();
-        let filename = String::from(path.file_name().unwrap().to_str().unwrap());
-        let sha1 = file::get_file_sha1(path.to_str().unwrap());
-        let enabled = path.extension().unwrap() == "jar";
-        println!("       get file attributes cost: {:#?}", time_start.elapsed());
+        // task::block_in_place(|| {
+            use std::time::Instant;
+            let time_start = Instant::now();
+            let path = path.as_ref();
+            let filename = String::from(path.file_name().unwrap().to_str().unwrap());
+            let sha1 = file::get_file_sha1(path.to_str().unwrap());
+            let enabled = path.extension().unwrap() == "jar";
+            println!(
+                "       get file attributes cost: {:#?}",
+                time_start.elapsed()
+            );
 
-        let time_start1 = Instant::now();
-        let cache = task::block_in_place(|| {
-            CACHE.blocking_lock()
-        });
-        let remote_version = match cache.get_cached_version_from_hash(&sha1) {
-            Ok(version) => Some(version),
-            Err(_) => None,
-        };
-        println!("       get_remote_version cost: {:#?}", time_start1.elapsed());
+            // let time_start1 = Instant::now();
+            // let cache = CACHE.blocking_lock();
+            // let remote_version = match cache.get_version_from_hash(&sha1) {
+            //     Ok(version) => Some(version),
+            //     Err(_) => None,
+            // };
+            // println!(
+            //     "       get_remote_version cost: {:#?}",
+            //     time_start1.elapsed()
+            // );
 
-        println!("   mod_file_of cost: {:#?}", time_start.elapsed());
-        ModFile {
-            path: String::from(path.to_str().unwrap()),
-            filename,
-            sha1,
-            remote_version,
-            enabled,
-        }
+            println!("   mod_file_of cost: {:#?}", time_start.elapsed());
+            ModFile {
+                path: String::from(path.to_str().unwrap()),
+                filename,
+                sha1,
+                // remote_version,
+                enabled,
+            }
+        // })
     }
 
     pub fn enable(&self) -> Result<(), String> {
@@ -106,7 +112,13 @@ impl ModFile {
             fs::create_dir_all(dir)?;
             fs::copy(&self.path, dst)?;
             let mod_file_path = Path::new(&self.path);
-            fs::rename(&mod_file_path, mod_file_path.parent().unwrap().join(format!("_amcm_{}", self.filename)))?;
+            fs::rename(
+                &mod_file_path,
+                mod_file_path
+                    .parent()
+                    .unwrap()
+                    .join(format!("_amcm_{}", self.filename)),
+            )?;
         }
         Ok(())
     }

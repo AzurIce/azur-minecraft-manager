@@ -15,9 +15,10 @@ export async function removeModFile(hash: string) {
 }
 
 export async function updateModFiles(targetPath: string) {
-    return await invoke<ModFile[]>("update_mod_files", { dir: await join(targetPath, "mods") });
+    return await invoke<ModFile[]>("update_mod_files", { dir: targetPath });
 }
 
 export async function watchModFiles(targetPath: string) {
-    return await invoke("watch_mod_files", {dir: await join(targetPath, "mods")});
+    return await invoke("watch_mod_files", {dir: targetPath});
 }
+

@@ -32,8 +32,12 @@ pub fn write_str<P: AsRef<Path>>(path: P, data: &str) -> Result<()> {
     Ok(())
 }
 
-#[tauri::command]
 pub fn copy_file<P: AsRef<Path>>(src: P, dst: P) -> Result<()> {
+    fs::create_dir_all(dst.as_ref().parent().unwrap())?;
     fs::copy(src, dst)?;
     Ok(())
+}
+
+pub fn delete_file<P: AsRef<Path>>(path: P) -> Result<()> {
+    fs::remove_file(path)
 }

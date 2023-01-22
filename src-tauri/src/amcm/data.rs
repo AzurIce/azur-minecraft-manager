@@ -6,6 +6,8 @@ use std::error::Error;
 use std::fs;
 use std::path::Path;
 
+use tokio::task;
+
 use tokio::sync::Mutex;
 lazy_static! {
     pub static ref DATA: Mutex<Data> = Mutex::new(Data::default());
@@ -36,7 +38,7 @@ impl Data {
 
             if file_path.is_file()
                 && (file_path.extension().unwrap() == "jar"
-                || file_path.extension().unwrap() == "disabled")
+                    || file_path.extension().unwrap() == "disabled")
             {
                 mod_files.push(ModFile::of(&file_path));
             }
@@ -46,26 +48,29 @@ impl Data {
         mod_files
     }
 
-    pub fn update_mod_file<P: AsRef<Path>>(&mut self, path: P) {
+    pub fn update_mod_file<P: AsRef<Path>>(&mut self, path: P) -> ModFile {
         let new_mod_file = ModFile::of(path);
 
         for mod_file in &mut self.mod_files {
             if mod_file.sha1 == new_mod_file.sha1 {
-                *mod_file = new_mod_file;
-                return;
+                *mod_file = new_mod_file.clone();
+                return new_mod_file;
             }
         }
-        self.mod_files.push(new_mod_file);
+        self.mod_files.push(new_mod_file.clone());
+        new_mod_file
     }
 
-    pub fn remove_mod_file_from_filepath<P: AsRef<Path>>(&mut self, path: P) {
+    pub fn remove_mod_file_from_filepath<P: AsRef<Path>>(&mut self, path: P) -> ModFile {
         let path = path.as_ref();
         for (index, mod_file) in self.mod_files.iter().enumerate() {
             if Path::new(&mod_file.path) == path {
+                let mf = self.mod_files.get(index).unwrap().clone();
                 self.mod_files.remove(index);
-                return;
+                return mf;
             }
         }
+        return ModFile::default();
     }
 
     pub fn get_mod_file_from_hash(&self, hash: String) -> Option<ModFile> {
@@ -86,5 +91,4 @@ impl Data {
         }
         Ok(())
     }
-
 }

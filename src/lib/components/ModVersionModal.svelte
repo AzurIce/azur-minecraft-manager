@@ -15,9 +15,9 @@
   import {
     getVersion,
     getVersions,
-    getVersionsFromHash,
+    getVersionFromHash,
   } from "$lib/apis/version";
-    import ModVersionCard from "./ModVersionCard.svelte";
+  import ModVersionCard from "./ModVersionCard.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -32,27 +32,17 @@
     console.log("project changed, updating versions");
     getVersions(project.versions).then((res) => {
       versions = res;
+      console.log(res);
     });
   }
-  // $: {
-  //   console.log("curModFile changed, updating curVersion");
-  //   getVersionsFromHash(curModFile.sha1).then((res) => {
-  //     curVersion = res;
-  //   });
-  // }
-
-  onMount(async () => {
-    // versions = await getVersions(project.versions);
-    // curVersion = await getVersionsFromHash(curModFile.sha1);
-    // console.log(versions);
-    // console.log(curVersion);
-  });
 </script>
 
 <Modal title="管理版本" bind:open={show} class="flex">
   <!-- <div class="flex flex-col h-80 overflow-y-auto"> -->
-  {#each versions as version}
-    <ModVersionCard {version} {curModFile}/>
-  {/each}
+  <!-- {#if curModFile} -->
+    {#each versions as version}
+      <ModVersionCard {version} {curModFile} />
+    {/each}
+  <!-- {/if} -->
   <!-- </div> -->
 </Modal>
