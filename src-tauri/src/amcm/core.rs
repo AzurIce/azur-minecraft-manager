@@ -44,23 +44,44 @@ impl Core {
                 }
                 let kind = event.kind;
                 if let EventKind::Create(create_kind) = kind {
+                    println!("Create {:#?}", create_kind);
                     if let CreateKind::File = create_kind {
-                        data.update_mod_file(path.as_path());
+                        let mod_file = data.update_mod_file(path.as_path());
+                        window
+                            .emit("mod_file_updated", mod_file)
+                            .expect("Event mod_file_updated emit failed");
                     } else if let CreateKind::Any = create_kind {
-                        data.update_mod_file(path.as_path());
+                        let mod_file = data.update_mod_file(path.as_path());
+                        window
+                            .emit("mod_file_updated", mod_file)
+                            .expect("Event mod_file_updated emit failed");
                     }
+                    return Ok(())
                 } else if let EventKind::Modify(modify_kind) = kind {
+                    println!("Modify {:#?}", modify_kind);
                     if let ModifyKind::Name(rename_mode) = modify_kind {
                         if let RenameMode::To = rename_mode {
-                            data.update_mod_file(path.as_path());
+                            let mod_file = data.update_mod_file(path.as_path());
+                            window
+                                .emit("mod_file_updated", mod_file)
+                                .expect("Event mod_file_updated emit failed");
                         }
                     }
+                    return Ok(());
                 } else if let EventKind::Remove(remove_kind) = kind {
+                    println!("Remove {:#?}", remove_kind);
                     if let RemoveKind::File = remove_kind {
-                        data.remove_mod_file_from_filepath(path.as_path());
+                        let mf = data.remove_mod_file_from_filepath(path.as_path());
+                        window
+                            .emit("mod_file_deleted", mf)
+                            .expect("Event mod_file_deleted emit failed");
                     } else if let RemoveKind::Any = remove_kind {
-                        data.remove_mod_file_from_filepath(path.as_path());
+                        let mf = data.remove_mod_file_from_filepath(path.as_path());
+                        window
+                            .emit("mod_file_deleted", mf)
+                            .expect("Event mod_file_deleted emit failed");
                     }
+                    return Ok(());
                 } else {
                     return Ok(());
                 }
@@ -94,12 +115,13 @@ impl Core {
         }
 
         // Watch
-        let path = Path::new(dir.as_str());
+        let path = Path::new(dir.as_str()).join(".minecraft").join("mods");
+        println!("Watching {:#?}", path);
         if let Err(error) = self
             .notify_watcher
             .as_mut()
             .unwrap()
-            .watch(path, RecursiveMode::NonRecursive)
+            .watch(path.as_path(), RecursiveMode::NonRecursive)
         {
             return Err(error.to_string());
         }

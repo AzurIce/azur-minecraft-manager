@@ -1,11 +1,18 @@
 <script lang="ts">
-  import { getIsVersionDownloaded, getVersion, getVersionsFromHash } from "$lib/apis/version";
-    import { targetIndex } from "$lib/stores";
+  import {
+    getIsVersionDownloaded,
+    getVersion,
+    getVersionFromHash,
+  } from "$lib/apis/version";
+  import { targetDir, targetIndex } from "$lib/stores";
+  import type { ModFile } from "$lib/typing/typing";
   import { invoke } from "@tauri-apps/api";
+  import { join } from "@tauri-apps/api/path";
   import { Badge, P, Spinner } from "flowbite-svelte";
+  import { onMount } from "svelte";
 
   export let version: any;
-  export let curModFile: any;
+  export let curModFile: ModFile;
   let curVersion: any;
 
   enum State {
@@ -14,26 +21,20 @@
     Choosed,
   }
 
-  $: {
-    console.log("curModFile changed, updating curVersion");
-    getVersionsFromHash(curModFile.sha1).then((res) => {
-      curVersion = res;
-    });
-  }
+  $: curVersion = curModFile ? curModFile.remote_version : undefined;
 
   $: state = downloaded
-    ? version.id == curVersion.id
+    ? curVersion && version.id == curVersion.id
       ? State.Choosed
       : State.Downloaded
     : State.NotDownloaded;
 
-  let downloaded: boolean;
-  $: {
-    console.log("version or curVersion changed, updating downloaded");
-    getIsVersionDownloaded(version.id).then((res) => {
+  let downloaded: boolean = false;
+  onMount(() => {
+    getIsVersionDownloaded($targetDir, version.id).then((res) => {
       downloaded = res;
     });
-  }
+  });
 </script>
 
 <div
@@ -45,18 +46,52 @@
     : state == State.NotDownloaded
     ? 'transition hover:border-gray-400 hover:cursor-pointer text-gray-300'
     : ''}"
-  on:click={() => {
+  on:click={async () => {
     if (state == State.NotDownloaded) {
-      invoke("download_version", { id: version.id }).then((res) => {
+      invoke("download_version", {
+        targetDir: $targetDir,
+        id: version.id,
+      }).then((res) => {
         console.log(res);
+        downloaded = true;
       });
     } else if (state == State.Downloaded) {
-      invoke("delete_mod_file", {hash: curModFile.sha1}).then((res) => {
-        console.log("delete_mod_file:", res);
-        invoke("copy_version_to_target", {versionId: version.id, targetId: $targetIndex}).then((res) => {
-          console.log("copy_version_to_target", res);
-        })
-      })
+      if (curModFile) {
+        await invoke("delete_file", {
+          path: curModFile.path,
+        });
+        console.log("deleted file");
+      }
+      await invoke("copy_file", {
+        src: await join(
+          $targetDir,
+          ".amcm",
+          "storage",
+          version.project_id,
+          `${version.id}.jar`
+        ),
+        dst: await join(
+          $targetDir,
+          ".minecraft",
+          "mods",
+          `${version.files[0].filename}.tmp`
+        ),
+      });
+      await invoke("rename_file", {
+        src: await join(
+          $targetDir,
+          ".minecraft",
+          "mods",
+          `${version.files[0].filename}.tmp`
+        ),
+        dst: await join(
+          $targetDir,
+          ".minecraft",
+          "mods",
+          `${version.files[0].filename}`
+        ),
+      });
+      console.log("copied file");
     }
     // Download
   }}
@@ -68,8 +103,18 @@
   <!-- </div> -->
 
   <!-- mid -->
-  <div class="flex flex-1 justify-between items-center">
+  <div class="flex flex-1 items-center gap-2">
     {version.name}
+    <Badge
+      color={state == State.Choosed
+        ? "blue"
+        : state == State.Downloaded
+        ? "blue"
+        : state == State.NotDownloaded
+        ? "dark"
+        : "blue"}>{version.id}</Badge
+    >
+    <div class="flex-1" />
 
     {#if state == State.Choosed}
       <i class="ri-check-line text-green-600" />

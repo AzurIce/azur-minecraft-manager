@@ -13,12 +13,20 @@
   $: version = file.remote_version;
   // let loadingVersion = true;
 
-  import { afterUpdate, beforeUpdate, onDestroy, onMount } from "svelte";
-  import { invoke } from "@tauri-apps/api";
+  import { createEventDispatcher, onMount } from "svelte";
   import { disableModFile, enableModFile } from "$lib/apis/mod_file";
-    import { targetIndex } from "$lib/stores";
+  import { fade } from "svelte/transition";
 
-  onMount(() => {});
+  const dispatch = createEventDispatcher();
+
+  function onToggleEnable() {
+
+    if (file.enabled) {
+      disableModFile(file.sha1);
+    } else {
+      enableModFile(file.sha1);
+    }
+  }
 </script>
 
 <div
@@ -26,35 +34,19 @@
     {file.enabled
     ? 'bg-white'
     : 'bg-gray-50'} rounded-md shadow-sm border gap-2"
+  in:fade
 >
-  <!-- <div class="flex items-center justify-center gap-2"> -->
   <P>{file.filename}</P>
-
-  <!-- {#if loadingVersion}
-    <span
-      class="inline-flex items-center px-2 py-1 rounded
-      text-xs bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300 gap-2"
-    >
-      Loading<Spinner size="3" />
-    </span>
-  {:else  -->
   {#if version}
     <button
       class="inline-flex items-center px-2 py-1 rounded
       text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300
       hover:bg-blue-200 hover:text-blue-900 dark:hover:bg-blue-800 dark:hover:text-blue-300"
       on:click={() => {
-        // console.log(version.project_id);
-        invoke("add_mod_source_from_local_mod_file", {projectId: version.project_id, versionId: version.id, modFileHash: file.sha1}).then((res) => {
-          console.log("added mod source from local file", res)
-          invoke("add_mod_source_to_target", {targetId: $targetIndex, projectId: version.project_id}).then((res) => {
-            console.log(res);
-          }).catch((err) => {
-            console.log(err);
-          })
-        }).catch((err) => {
-          console.log(err);
-        })
+        dispatch("addToRemoteMod", {
+          version_id: version.id,
+          project_id: version.project_id,
+        });
       }}
     >
       Modrinth<i class="ri-add-line" />
@@ -77,21 +69,17 @@
   {/if}
   <div class="flex-1" />
   <ButtonGroup>
-    {#if file.enabled}
-      <Button
-        size="xs"
-        color="green"
-        on:click={() => disableModFile(file.sha1)}
-      >
-        <i class="ri-check-line" />
-      </Button>
-    {:else}
-      <Button size="xs" color="red" on:click={() => enableModFile(file.sha1)}>
-        <i class="ri-close-line" />
-      </Button>
-    {/if}
+    <Button
+      size="xs"
+      color={file.enabled ? "green" : "red"}
+      on:click={() => {
+        onToggleEnable();
+      }}
+    >
+      <i class={file.enabled ? "ri-check-line" : "ri-close-line"} />
+    </Button>
     <Button size="xs"><i class="ri-more-2-line" /></Button>
   </ButtonGroup>
-  <button on:click={() => {}} />
+  <!-- <button on:click={() => {}} /> -->
   <!-- </div> -->
 </div>
