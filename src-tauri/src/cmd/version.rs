@@ -79,6 +79,7 @@ pub async fn download_version(target_dir: String, id: String) -> Result<(), Stri
                             .join("storage")
                             .join(version.project_id)
                             .join(format!("{}.jar", version.id));
+                        fs::create_dir_all(path.parent().unwrap()).expect("cannot create dir");
                         match fs::write(path, &bytes) {
                             Ok(_) => Ok(()),
                             Err(err) => Err(format!("{}", err)),
