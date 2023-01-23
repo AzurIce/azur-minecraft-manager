@@ -7,6 +7,7 @@ export enum TargetType {
 export interface Target {
     kind: TargetType;
     location: string;
+    mod_sources: any[]
 }
 
 export enum ModLoader {
@@ -41,8 +42,17 @@ export interface Mod {
 
 export interface ModFile {
     filename: string, // From file
+    path: string,
     sha1: string,
+    remote_version: any,
+    enabled: boolean,
 
-    belong_mod: Mod, // From sha1 + modrinth API
-    game_versions: Array<string>,
+    // belong_mod: Mod, // From sha1 + modrinth API
+    // game_versions: Array<string>,
 }
+
+
+// export enum BelongState {
+//     Unknown = "Unknown",
+//     Modrinth = "Modrinth",
+// }

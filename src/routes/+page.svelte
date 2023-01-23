@@ -1,72 +1,61 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { invoke } from "@tauri-apps/api";
-  import ModalAddTarget from "$lib/components/ModalAddTarget.svelte";
-  import CardTarget from "$lib/components/CardTarget.svelte";
-  import { Button } from "flowbite-svelte";
-  import type { TargetType, Target } from "$lib/typing/typing";
-    import Toggle from "$lib/components/Toggle.svelte";
+  import { Button, Hr, P } from "flowbite-svelte";
+  import { getVersion } from "@tauri-apps/api/app";
+  import { store, targetDir } from "$lib/stores";
+  import { open } from "@tauri-apps/api/dialog";
+  import { goto } from "$app/navigation";
 
-  let targetList: Target[] = [];
-  let modalAddTarget = false;
+  let appVersion: string;
+
+  $: if ($targetDir !== "") {
+    goto(`/main`);
+  }
 
   onMount(async () => {
-    targetList = await invoke<Target[]>("get_target_list");
-    // targetList = JSON.parse(res);
-    // console.log(targetList);
+    $targetDir = (await store.get<string>("targetDir")) || "";
+    appVersion = await getVersion();
   });
 
-  function onUpdateTargets(event: CustomEvent) {
-    targetList = event.detail.targets;
+  async function onChooseDir() {
+    const select = await open({
+      defaultPath: $targetDir,
+      directory: true,
+      multiple: false,
+    });
+    console.log(select);
+    if (select == null) return;
+
+    store.set("targetDir", select);
   }
 </script>
 
-<!-- <div class="container mx-auto flex flex-col"> -->
-<div class="flex-1 flex flex-col items-center">
-  <img
-    src="/AzurCraft.svg"
-    class="-z-10 absolute h-full m-auto logo azurcraft"
-    alt="AzurCraft Logo"
-  />
+<div class="flex-1 flex flex-col items-center gap-2">
+  <!-- <p class="font-extralight">ExtraLight | The quick brown fox ...</p>
+  <p class="font-light">Light | The quick brown fox ...</p>
+  <p class="font-normal">Normal | The quick brown fox ...</p>
+  <p class="font-semibold">Semibold | The quick brown fox ...</p>
+  <p class="font-bold">Bold | The quick brown fox ...</p> -->
 
-  {#if targetList.length > 0}
-    <div
-      class="w-full flex flex-wrap flex-1 flex-row gap-4 items-center justify-start content-start bg-white bg-opacity-50 backdrop-blur p-4"
-    >
-      {#each targetList as target, i (target)}
-        <CardTarget {target} id={i} on:deleted={onUpdateTargets} />
-      {/each}
-      <Button
-        on:click={() => {
-          modalAddTarget = true;
-        }}
-      >
-        + 添加管理项
-      </Button>
+  <!-- brand -->
+  <div class="flex flex-col m-4">
+    <img src="/AzurCraft.svg" class="-z-10 h-32" alt="AzurCraft Logo" />
+    <P size="xl" align="center" space="widest" weight="semibold">AMCM</P>
+    <P size="sm" align="center">版本 {appVersion}</P>
+  </div>
+
+  <Hr width="w-3/4" />
+
+  <div class="flex flex-col w-full m-4">
+    <div class="flex w-full justify-between pl-8 pr-8">
+      <div class="flex flex-col gap-1">
+        <P weight="semibold">管理本地目标</P>
+        <P size="sm">
+          将一个包含 .minecraft/ 的文件夹作为管理目标在 AMCM 中打开。
+        </P>
+      </div>
+
+      <Button on:click={onChooseDir}>打开</Button>
     </div>
-  {:else}
-    <div
-      class="w-full flex flex-1 flex-col items-center justify-center bg-white bg-opacity-50 backdrop-blur"
-    >
-      <p class="my-4">
-        欢迎使用 Azur Minecraft Manager，首先请先添加一个管理项
-      </p>
-      <Button
-        on:click={() => {
-          modalAddTarget = true;
-        }}
-      >
-        + 添加管理项
-      </Button>
-    </div>
-  {/if}
-  <Toggle/>
+  </div>
 </div>
-<ModalAddTarget bind:show={modalAddTarget} on:added={onUpdateTargets} />
-
-<!-- </div> -->
-<style>
-  .logo.azurcraft:hover {
-    filter: drop-shadow(0 0 2em #3381ff);
-  }
-</style>

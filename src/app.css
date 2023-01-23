@@ -2,21 +2,107 @@
 @tailwind components;
 @tailwind utilities;
 
-/* :root {
-  font-family: Microsoft YaHei UI, Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
+/* ExtraLight */
+@font-face {
+  font-family: 'Sarasa Gothic SC';
+  src: local('Sarasa Gothic SC Extralight'),
+  url('/fonts/sarasa-gothic-sc-extralight.ttf');
+  font-display: swap;
+  font-weight: 200;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Sarasa Gothic SC';
+  src: local('Sarasa Gothic SC Extralight Italic'),
+  url('/fonts/sarasa-gothic-sc-extralightitalic.ttf');
+  font-display: swap;
+  font-weight: 200;
+  font-style: italic;
+}
+/* Light */
+@font-face {
+  font-family: 'Sarasa Gothic SC';
+  src: local('Sarasa Gothic SC Light'),
+  url('/fonts/sarasa-gothic-sc-light.ttf');
+  font-display: swap;
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Sarasa Gothic SC';
+  src: local('Sarasa Gothic SC Light Italic'),
+  url('/fonts/sarasa-gothic-sc-lightitalic.ttf');
+  font-display: swap;
+  font-weight: 300;
+  font-style: italic;
+}
+/* Normal */
+@font-face {
+  font-family: 'Sarasa Gothic SC';
+  src: local('Sarasa Gothic SC Regular'),
+  url('fonts/sarasa-gothic-sc-regular.ttf');
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Sarasa Gothic SC';
+  src: local('Sarasa Gothic SC Italic'),
+  url('fonts/sarasa-gothic-sc-italic.ttf');
+  font-display: swap;
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Sarasa Gothic SC';
+  src: local('Sarasa Gothic SC SemiBold'),
+  url('/fonts/sarasa-gothic-sc-semibold.ttf');
+  font-display: swap;
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Sarasa Gothic SC';
+  src: local('Sarasa Gothic SC SemiBold Italic'),
+  url('/fonts/sarasa-gothic-sc-semibolditalic.ttf');
+  font-display: swap;
+  font-weight: 600;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Sarasa Gothic SC';
+  src: local('Sarasa Gothic SC Bold'),
+  url('/fonts/sarasa-gothic-sc-bold.ttf');
+  font-display: swap;
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Sarasa Gothic SC';
+  src: local('Sarasa Gothic SC Bold Italic'),
+  url('/fonts/sarasa-gothic-sc-bolditalic.ttf');
+  font-display: swap;
+  font-weight: 700;
+  font-style: italic;
+}
+
+:root {
+  font-family: "Sarasa Gothic SC", Consolas;
+  /* font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; */
+  /* font-family: Microsoft YaHei UI, Inter, Avenir, Helvetica, Arial, sans-serif; */
+  /* font-size: 16px;
   line-height: 24px;
   font-weight: 400;
 
   color: #0f0f0f;
-  background-color: #f6f6f6;
+  background-color: #f6f6f6; */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
-} */
+}
 
 /* .container {
   margin: 0;

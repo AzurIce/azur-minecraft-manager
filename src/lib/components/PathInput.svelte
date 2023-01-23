@@ -34,10 +34,10 @@
 
 <div class="m-2">
     <Label for="input" color={ valid || inputValue.length == 0 ? undefined : "red"} class='block mb-2'>{label}</Label>
-    <div class="flex">
+    <div class="flex gap-2">
         <Input
             id="input"
-            class="bg-white"
+            class="!bg-white border"
             color={ valid || inputValue.length == 0 ? undefined : "red"}
             bind:value={inputValue}
             on:input={onInputPathChanged}

@@ -3,7 +3,7 @@
 </script>
 
 <button
-  class="flex items-center cursor-pointer relative mb-4"
+  class="flex items-center cursor-pointer relative"
   on:click
 >
   <div

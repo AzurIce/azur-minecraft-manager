@@ -31,6 +31,7 @@
     let target: Target = {
       kind: targetType,
       location: path,
+      mod_sources: []
     };
 
     invoke("add_target", {

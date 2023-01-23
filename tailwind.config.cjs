@@ -7,8 +7,11 @@ module.exports = {
   theme: {
     extend: {},
     fontWeight: {
+      extralight: 200,
+      light: 300,
       normal: 400,
-      medium: 600,
+      semibold: 600,
+      bold: 700,
     }
   },
   plugins: [
