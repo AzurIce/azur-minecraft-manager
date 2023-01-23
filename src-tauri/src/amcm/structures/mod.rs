@@ -16,7 +16,7 @@ pub mod mod_file;
 // 	// ...
 // }
 
-pub mod mods_json;
+// pub mod mods_json;
 
 // //----- ModFileBelong -----//
 // #[derive(Serialize, Deserialize, Debug)]

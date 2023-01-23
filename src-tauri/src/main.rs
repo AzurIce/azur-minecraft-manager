@@ -18,9 +18,9 @@ use futures::executor::block_on;
 
 fn main() {
     // Initialize the database
-    if let Err(err) = block_on(init_db()) {
-        panic!("{}", err)
-    }
+    // if let Err(err) = block_on(init_db()) {
+    //     panic!("{}", err)
+    // }
     // Initialize tauri
     tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::default().build())
