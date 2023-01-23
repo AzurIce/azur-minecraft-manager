@@ -13,10 +13,16 @@ mod amcm;
 mod cmd;
 mod utils;
 
-use amcm::database::init_db;
+use amcm::{database::init_db, AMCM_DIR};
 use futures::executor::block_on;
 
+// fn init_dir() {
+//     use std::fs;
+//     fs::
+// }
+
 fn main() {
+    // init_dir();
     // Initialize the database
     // if let Err(err) = block_on(init_db()) {
     //     panic!("{}", err)

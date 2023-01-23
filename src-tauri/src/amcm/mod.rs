@@ -9,13 +9,12 @@ pub mod migrator;
 
 #[cfg(test)]
 mod cache_test;
-#[cfg(test)]
-mod data_test;
+
+use tauri::api::path;
 
 use std::path::PathBuf;
 use std::env;
 lazy_static! {
-    pub static ref AMCM_DIR: PathBuf = env::current_exe().unwrap()
-        .parent().unwrap()
+    pub static ref AMCM_DIR: PathBuf = path::data_dir().unwrap()
         .join(".amcm/");
 }
