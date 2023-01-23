@@ -32,7 +32,7 @@
     console.log("project changed, updating versions");
     getVersions(project.versions).then((res) => {
       versions = res;
-      console.log(res);
+      // console.log(res);
     });
   }
 </script>

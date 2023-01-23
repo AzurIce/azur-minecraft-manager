@@ -74,7 +74,21 @@
           $targetDir,
           ".minecraft",
           "mods",
-          version.files[0].filename
+          `${version.files[0].filename}.tmp`
+        ),
+      });
+      await invoke("rename_file", {
+        src: await join(
+          $targetDir,
+          ".minecraft",
+          "mods",
+          `${version.files[0].filename}.tmp`
+        ),
+        dst: await join(
+          $targetDir,
+          ".minecraft",
+          "mods",
+          `${version.files[0].filename}`
         ),
       });
       console.log("copied file");

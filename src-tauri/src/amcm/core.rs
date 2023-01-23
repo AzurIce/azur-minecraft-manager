@@ -44,7 +44,7 @@ impl Core {
                 }
                 let kind = event.kind;
                 if let EventKind::Create(create_kind) = kind {
-                    println!("{:#?}", create_kind);
+                    println!("Create {:#?}", create_kind);
                     if let CreateKind::File = create_kind {
                         let mod_file = data.update_mod_file(path.as_path());
                         window
@@ -58,7 +58,7 @@ impl Core {
                     }
                     return Ok(())
                 } else if let EventKind::Modify(modify_kind) = kind {
-                    println!("{:#?}", modify_kind);
+                    println!("Modify {:#?}", modify_kind);
                     if let ModifyKind::Name(rename_mode) = modify_kind {
                         if let RenameMode::To = rename_mode {
                             let mod_file = data.update_mod_file(path.as_path());
@@ -69,7 +69,7 @@ impl Core {
                     }
                     return Ok(());
                 } else if let EventKind::Remove(remove_kind) = kind {
-                    println!("{:#?}", remove_kind);
+                    println!("Remove {:#?}", remove_kind);
                     if let RemoveKind::File = remove_kind {
                         let mf = data.remove_mod_file_from_filepath(path.as_path());
                         window

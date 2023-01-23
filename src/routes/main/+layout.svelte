@@ -43,6 +43,7 @@
           let remote_version = $modFiles[i].remote_version;
           $modFiles[i] = event.payload;
           $modFiles[i].remote_version = remote_version;
+          $modFiles = $modFiles;
           return;
         }
       }
@@ -50,6 +51,7 @@
       getVersionFromHash(modFile.sha1).then((res) => {
         modFile.remote_version = res;
         $modFiles.push(modFile);
+        $modFiles = $modFiles;
       });
     });
     unlisten2 = await listen<any>("mod_file_deleted", (event) => {
@@ -57,6 +59,7 @@
       for (let i = 0; i < $modFiles.length; i++) {
         if ($modFiles[i].sha1 == event.payload.sha1) {
           $modFiles.splice(i, 1);
+          $modFiles = $modFiles;
           return;
         }
       }

@@ -53,7 +53,10 @@ pub fn add_remote_mod(target_dir: String, project_id: String) -> Result<(), Stri
 #[tauri::command]
 pub fn copy_file(src: String, dst: String) -> Result<(), String> {
     match file::copy_file(src, dst) {
-        Ok(_) => Ok(()),
+        Ok(_) => {
+            println!("copied file");
+            Ok(())
+        },
         Err(err) => Err(format!("{}", err)),
     }
 }
@@ -61,6 +64,14 @@ pub fn copy_file(src: String, dst: String) -> Result<(), String> {
 #[tauri::command]
 pub fn delete_file(path: String) -> Result<(), String> {
     match file::delete_file(path) {
+        Ok(_) => Ok(()),
+        Err(err) => Err(format!("{}", err)),
+    }
+}
+
+#[tauri::command]
+pub fn rename_file(src: String, dst: String) -> Result<(), String> {
+    match fs::rename(src, dst) {
         Ok(_) => Ok(()),
         Err(err) => Err(format!("{}", err)),
     }

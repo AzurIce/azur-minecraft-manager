@@ -28,6 +28,7 @@ fn main() {
             cmd::get_remote_mods,
             cmd::add_remote_mod,
             cmd::copy_file,
+            cmd::rename_file,
             cmd::delete_file,
             // cmd::load,
             // cmd::target::get_targets,
