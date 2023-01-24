@@ -22,7 +22,6 @@
   export let curModFile: any;
 
   let versions = new Array<any>();
-  // let curVersion: any = { sha1: "" };
 
   $: {
     console.log("project changed, updating versions");

@@ -33,9 +33,9 @@
     if (!curModFile) return;
 
     if (curModFile.enabled) {
-      disableModFile(curModFile.sha1);
+      disableModFile(curModFile);
     } else {
-      enableModFile(curModFile.sha1);
+      enableModFile(curModFile);
     }
   }
 

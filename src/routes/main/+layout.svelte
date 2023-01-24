@@ -57,7 +57,7 @@
     unlisten2 = await listen<any>("mod_file_deleted", (event) => {
       console.log("mod_file_deleted");
       for (let i = 0; i < $modFiles.length; i++) {
-        if ($modFiles[i].sha1 == event.payload.sha1) {
+        if ($modFiles[i].path == event.payload) {
           $modFiles.splice(i, 1);
           $modFiles = $modFiles;
           return;

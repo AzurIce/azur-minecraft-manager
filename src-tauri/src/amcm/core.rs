@@ -2,7 +2,8 @@ use std::error::Error;
 use std::path::Path;
 use std::time::Instant;
 
-use crate::amcm::data::DATA;
+// use crate::amcm::data::DATA;
+use crate::amcm::structures::mod_file::ModFile;
 
 use tokio::sync::Mutex;
 lazy_static! {
@@ -34,9 +35,6 @@ impl Core {
         };
         match res {
             Ok(event) => {
-                // Get data lock
-                let mut data = DATA.blocking_lock();
-
                 // Update mod file
                 let path = event.paths.last().unwrap();
                 if path.extension().unwrap() != "jar" && path.extension().unwrap() != "disabled" {
@@ -46,22 +44,22 @@ impl Core {
                 if let EventKind::Create(create_kind) = kind {
                     println!("Create {:#?}", create_kind);
                     if let CreateKind::File = create_kind {
-                        let mod_file = data.update_mod_file(path.as_path());
+                        let mod_file = ModFile::of(path.as_path());
                         window
                             .emit("mod_file_updated", mod_file)
                             .expect("Event mod_file_updated emit failed");
                     } else if let CreateKind::Any = create_kind {
-                        let mod_file = data.update_mod_file(path.as_path());
+                        let mod_file = ModFile::of(path.as_path());
                         window
                             .emit("mod_file_updated", mod_file)
                             .expect("Event mod_file_updated emit failed");
                     }
-                    return Ok(())
+                    return Ok(());
                 } else if let EventKind::Modify(modify_kind) = kind {
                     println!("Modify {:#?}", modify_kind);
                     if let ModifyKind::Name(rename_mode) = modify_kind {
                         if let RenameMode::To = rename_mode {
-                            let mod_file = data.update_mod_file(path.as_path());
+                            let mod_file = ModFile::of(path.as_path());
                             window
                                 .emit("mod_file_updated", mod_file)
                                 .expect("Event mod_file_updated emit failed");
@@ -71,14 +69,14 @@ impl Core {
                 } else if let EventKind::Remove(remove_kind) = kind {
                     println!("Remove {:#?}", remove_kind);
                     if let RemoveKind::File = remove_kind {
-                        let mf = data.remove_mod_file_from_filepath(path.as_path());
+                        // let mf = data.remove_mod_file_from_filepath(path.as_path());
                         window
-                            .emit("mod_file_deleted", mf)
+                            .emit("mod_file_deleted", path.to_str().unwrap())
                             .expect("Event mod_file_deleted emit failed");
                     } else if let RemoveKind::Any = remove_kind {
-                        let mf = data.remove_mod_file_from_filepath(path.as_path());
+                        // let mf = data.remove_mod_file_from_filepath(path.as_path());
                         window
-                            .emit("mod_file_deleted", mf)
+                            .emit("mod_file_deleted", path.to_str().unwrap())
                             .expect("Event mod_file_deleted emit failed");
                     }
                     return Ok(());
@@ -86,11 +84,6 @@ impl Core {
                     return Ok(());
                 }
 
-                // Emit
-                let time_start = Instant::now();
-                window
-                    .emit("mod_files_updated", data.mod_files())
-                    .expect("Event mod_files_updated emit failed");
                 Ok(())
             }
             Err(e) => {

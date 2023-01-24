@@ -22,9 +22,9 @@
   function onToggleEnable() {
 
     if (file.enabled) {
-      disableModFile(file.sha1);
+      disableModFile(file);
     } else {
-      enableModFile(file.sha1);
+      enableModFile(file);
     }
   }
 </script>

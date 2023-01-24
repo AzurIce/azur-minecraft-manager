@@ -1,4 +1,4 @@
-import { readable, writable } from 'svelte/store';
+import { writable } from 'svelte/store';
 import type { ModFile } from './typing/typing';
 
 import { Store } from 'tauri-plugin-store-api';
@@ -14,12 +14,6 @@ store.onChange((k, v) => {
 export const projectsCache = new Store("amcm-projects-cache.dat");
 export const versionsCache = new Store("amcm-versions-cache.dat");
 export const hash2versionCache = new Store("amcm-hash2version-cache.dat");
-// export const projects = writable<Map<string, any>>(new Map());
-// export const versions = writable<object>(new Map());
-// projectsCache.onChange((k, v) => {
-//     projects.update(e => e.set(k, v));
-    // else if (k === "versions") versions.set(v as object);
-// })
 
 // Runtime data
 export const modFiles = writable(new Array<ModFile>);

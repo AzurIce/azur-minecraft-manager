@@ -32,7 +32,7 @@ pub fn write_str<P: AsRef<Path>>(path: P, data: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn copy_file<P: AsRef<Path>>(src: P, dst: P) -> Result<()> {
+pub fn copy_file<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> Result<()> {
     fs::create_dir_all(dst.as_ref().parent().unwrap())?;
     fs::copy(src, dst)?;
     Ok(())

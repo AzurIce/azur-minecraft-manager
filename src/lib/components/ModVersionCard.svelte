@@ -27,7 +27,7 @@
 
   let downloaded: boolean = false;
   onMount(() => {
-    getIsVersionDownloaded($targetDir, version.id).then((res) => {
+    getIsVersionDownloaded($targetDir, version.project_id, version.id).then((res) => {
       downloaded = res;
     });
   });
@@ -46,7 +46,9 @@
     if (state == State.NotDownloaded) {
       invoke("download_version", {
         targetDir: $targetDir,
-        id: version.id,
+        projectId: version.project_id,
+        versionId: version.id,
+        fileUrl: version.files[0].url
       }).then((res) => {
         console.log(res);
         downloaded = true;

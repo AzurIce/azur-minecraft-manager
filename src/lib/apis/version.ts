@@ -29,10 +29,20 @@ export async function getVersion(id: string) {
 }
 
 export async function getVersions(ids: Array<string>) {
-    return await Promise.all(ids.map(async (id) => await getVersion(id)));
-    // return await invoke<any[]>("get_versions", { ids: ids });
+    let cachedVersions = new Array<any>();
+    let uncachedIds = await Promise.all(ids.filter(async (id) => {
+        const version = await versionsCache.get<any>(id);
+        if (version !== null) cachedVersions.push(version);
+        return version === null;
+    }));
+
+    if (uncachedIds.length > 0) {
+        cachedVersions = cachedVersions.concat(await invoke<Array<any>>("get_versions", { ids: uncachedIds }));
+    }
+
+    return cachedVersions;
 }
 
-export async function getIsVersionDownloaded(target_dir: string, version_id: string) {
-    return await invoke<boolean>("is_version_downloaded", { targetDir: target_dir, versionId: version_id });
+export async function getIsVersionDownloaded(target_dir: string, project_id: string, version_id: string) {
+    return await invoke<boolean>("is_version_downloaded", { targetDir: target_dir, projectId: project_id, versionId: version_id });
 }
