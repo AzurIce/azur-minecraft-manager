@@ -1,10 +1,6 @@
 <script lang="ts">
-  import {
-    getIsVersionDownloaded,
-    getVersion,
-    getVersionFromHash,
-  } from "$lib/apis/version";
-  import { targetDir, targetIndex } from "$lib/stores";
+  import { getIsVersionDownloaded } from "$lib/apis/version";
+  import { targetDir } from "$lib/stores";
   import type { ModFile } from "$lib/typing/typing";
   import { invoke } from "@tauri-apps/api";
   import { join } from "@tauri-apps/api/path";

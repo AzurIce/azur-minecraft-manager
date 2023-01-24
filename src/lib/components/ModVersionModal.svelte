@@ -12,11 +12,7 @@
   import { TargetType, type Target } from "../typing/typing";
   import { createEventDispatcher } from "svelte";
   import { onMount } from "svelte";
-  import {
-    getVersion,
-    getVersions,
-    getVersionFromHash,
-  } from "$lib/apis/version";
+  import { getVersions } from "$lib/apis/version";
   import ModVersionCard from "./ModVersionCard.svelte";
 
   const dispatch = createEventDispatcher();
@@ -40,9 +36,9 @@
 <Modal title="管理版本" bind:open={show} class="flex">
   <!-- <div class="flex flex-col h-80 overflow-y-auto"> -->
   <!-- {#if curModFile} -->
-    {#each versions as version}
-      <ModVersionCard {version} {curModFile} />
-    {/each}
+  {#each versions as version}
+    <ModVersionCard {version} {curModFile} />
+  {/each}
   <!-- {/if} -->
   <!-- </div> -->
 </Modal>

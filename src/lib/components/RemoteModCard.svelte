@@ -1,26 +1,9 @@
 <script lang="ts">
-  import {
-    Badge,
-    P,
-    Img,
-    Dropdown,
-    DropdownItem,
-    Chevron,
-    Button,
-    ButtonGroup,
-    Tooltip,
-  } from "flowbite-svelte";
+  import { Badge, P, Img, Button, ButtonGroup } from "flowbite-svelte";
 
   export let project_id: string;
 
-  import { onMount } from "svelte";
-  import { getProject } from "$lib/apis/project";
-  import {
-    getVersion,
-    getVersions,
-    getVersionFromHash,
-  } from "$lib/apis/version";
-  import Toggle from "./Toggle.svelte";
+  import { getProject, updateProject } from "$lib/apis/project";
   import ModVersionModal from "./ModVersionModal.svelte";
   import { modFiles } from "$lib/stores";
   import { disableModFile, enableModFile } from "$lib/apis/mod_file";
@@ -100,7 +83,11 @@
           onToggleEnable();
         }}
       >
-        <i class={curModFile && curModFile.enabled ? "ri-check-line" : "ri-close-line"} />
+        <i
+          class={curModFile && curModFile.enabled
+            ? "ri-check-line"
+            : "ri-close-line"}
+        />
       </Button>
       <Button size="xs"><i class="ri-more-2-line" /></Button>
     </ButtonGroup>
@@ -124,5 +111,5 @@
       <Badge color="dark">Server: Unsupported</Badge>
     {/if}
   </div>
-  <ModVersionModal bind:show={show} {project} {curModFile}/>
+  <ModVersionModal bind:show {project} {curModFile} />
 </div>
