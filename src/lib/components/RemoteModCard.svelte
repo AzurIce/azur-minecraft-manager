@@ -1,25 +1,12 @@
 <script lang="ts">
-  import { Badge, P, Img, Button, ButtonGroup } from "flowbite-svelte";
+  import { Badge, P, Img, Button, ButtonGroup, Spinner } from "flowbite-svelte";
 
   export let project_id: string;
 
-  import { getProject, updateProject } from "$lib/apis/project";
+  import { getProject } from "$lib/apis/project";
   import ModVersionModal from "./ModVersionModal.svelte";
   import { modFiles } from "$lib/stores";
   import { disableModFile, enableModFile } from "$lib/apis/mod_file";
-
-  let project: any = {
-    title: "",
-    description: "",
-    icon_url: "",
-    client_side: "",
-    server_side: "",
-    versions: [],
-  };
-
-  $: getProject(project_id).then((res) => {
-    project = res;
-  });
 
   $: curModFile = $modFiles.find(
     (modFile) =>
@@ -27,7 +14,7 @@
       modFile.remote_version.project_id == project_id
   );
 
-  // $: console.log(curModFile);
+  // $: console.log("curModFile: ", curModFile);
 
   function onToggleEnable() {
     if (!curModFile) return;
@@ -47,6 +34,11 @@
     ? 'bg-white'
     : 'bg-gray-50'} rounded-md shadow-sm border"
 >
+{#await getProject(project_id)}
+  <div class="flex w-full justify-center">
+    <Spinner size={10} />
+  </div>
+{:then project}
   <!-- head -->
   <div class="flex items-center gap-2">
     <P>{project.title}</P>
@@ -111,5 +103,6 @@
       <Badge color="dark">Server: Unsupported</Badge>
     {/if}
   </div>
-  <ModVersionModal bind:show {project} {curModFile} />
+  <ModVersionModal bind:show versionIds={project.versions} {curModFile} />
+  {/await}
 </div>

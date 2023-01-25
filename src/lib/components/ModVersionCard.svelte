@@ -6,6 +6,7 @@
   import { join } from "@tauri-apps/api/path";
   import { Badge, P, Spinner } from "flowbite-svelte";
   import { onMount } from "svelte";
+  import moment from "moment";
 
   export let version: any;
   export let curModFile: ModFile;
@@ -14,6 +15,7 @@
   enum State {
     NotDownloaded,
     Downloaded,
+    Downloading,
     Choosed,
   }
 
@@ -44,6 +46,7 @@
     : ''}"
   on:click={async () => {
     if (state == State.NotDownloaded) {
+      state = State.Downloading;
       invoke("download_version", {
         targetDir: $targetDir,
         projectId: version.project_id,
@@ -51,6 +54,7 @@
         fileUrl: version.files[0].url
       }).then((res) => {
         console.log(res);
+        state = State.Downloaded;
         downloaded = true;
       });
     } else if (state == State.Downloaded) {
@@ -95,12 +99,8 @@
   }}
   on:keydown={() => {}}
 >
+
   <!-- head -->
-  <!-- <div class="flex items-center gap-2"> -->
-
-  <!-- </div> -->
-
-  <!-- mid -->
   <div class="flex flex-1 items-center gap-2">
     {version.name}
     <Badge
@@ -118,9 +118,16 @@
       <i class="ri-check-line text-green-600" />
     {:else if state == State.Downloaded}
       <i class="ri-check-line text-gray-300" />
+    {:else if state == State.Downloading}
+      <Spinner size={4}/>
     {:else if state == State.NotDownloaded}
       <i class="ri-download-line" />
     {/if}
+  </div>
+
+  <!-- mid -->
+  <div class="flex items-center gap-2 text-sm font-light">
+    发布时间：{moment(version.date_published).format("YYYY-M-D H:mm:ss")}
   </div>
 
   <!-- foot -->

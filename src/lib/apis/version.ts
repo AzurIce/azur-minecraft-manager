@@ -8,6 +8,7 @@ export async function getVersionsFromHashes(hashes: Array<string>) {
 export async function updateVersionFromHash(hash: string) {
     const version = await invoke<any>("get_version_from_hash", { hash: hash });
     hash2versionCache.set(hash, version);
+    return version;
 }
 
 export async function getVersionFromHash(hash: string) {
@@ -29,18 +30,36 @@ export async function getVersion(id: string) {
 }
 
 export async function getVersions(ids: Array<string>) {
+    console.log("version.ts/getVersions: ", ids.length);
     let cachedVersions = new Array<any>();
-    let uncachedIds = await Promise.all(ids.filter(async (id) => {
+    let uncachedIds = new Array<string>();
+    await Promise.all(ids.map(async (id) => {
         const version = await versionsCache.get<any>(id);
+        // console.log(version);
+        if (version === null) uncachedIds.push(id);
         if (version !== null) cachedVersions.push(version);
-        return version === null;
     }));
 
+    console.log("uncachedIds: ", uncachedIds);
     if (uncachedIds.length > 0) {
-        cachedVersions = cachedVersions.concat(await invoke<Array<any>>("get_versions", { ids: uncachedIds }));
+        let uncachedVersions = await updateVersions(uncachedIds);
+        // console.log("uncachedIds: ", uncachedIds);
+        // console.log("getVersions: ", cachedVersions, uncachedVersions);
+        console.log(cachedVersions, uncachedVersions)
+        return [...cachedVersions, ...uncachedVersions];
     }
 
     return cachedVersions;
+}
+
+export async function updateVersions(ids: Array<string>) {
+    let versions = await invoke<Array<any>>("get_versions", { ids: ids });
+
+    versions.forEach((version) => {
+        versionsCache.set(version.id, version);
+    })
+
+    return versions;
 }
 
 export async function getIsVersionDownloaded(target_dir: string, project_id: string, version_id: string) {

@@ -1,16 +1,9 @@
-use crate::{
-    amcm::AMCM_DIR,
-    utils::file,
-};
+use crate::utils::file;
 
 use ferinth::structures::version::Version;
-use ferinth::Error;
 use ferinth::Ferinth;
 use std::fs;
-use std::io::Write;
 use std::path::Path;
-use std::{collections::HashMap, time::Instant};
-use tokio::task;
 
 #[tauri::command]
 pub async fn get_version_from_hash(hash: String) -> Result<Version, String> {
@@ -26,11 +19,6 @@ pub async fn get_version_from_hash(hash: String) -> Result<Version, String> {
         }
     }
 }
-
-// #[tauri::command]
-// pub async fn get_versions_from_hashes(hashes: Vec<String>) -> HashMap<String, Version> {
-//     CACHE.lock().await.get_versions_from_hashes(hashes)
-// }
 
 #[tauri::command]
 pub async fn get_version(id: String) -> Result<Version, String> {
@@ -68,11 +56,9 @@ pub async fn is_version_downloaded(target_dir: String, project_id: String, versi
 #[tauri::command]
 pub async fn download_version(target_dir: String, project_id: String, version_id: String, file_url: String) -> Result<(), String> {
 
-    let client = reqwest::blocking::Client::new();
-    // println!("{:#?}", version.files);
-    // let url = version.files.first().unwrap().url.as_str();
-    match client.get(file_url).send() {
-        Ok(res) => match res.bytes() {
+    let client = reqwest::Client::new();
+    match client.get(file_url).send().await {
+        Ok(res) => match res.bytes().await {
             Ok(bytes) => {
                 let path = Path::new(&target_dir)
                     .join(".amcm")

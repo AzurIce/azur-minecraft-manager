@@ -1,11 +1,11 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
-    import { updateModFiles, watchModFiles } from "$lib/apis/mod_file";
-    import { getVersionFromHash } from "$lib/apis/version";
+  import { watchModFiles } from "$lib/apis/mod_file";
+  import { getVersionFromHash } from "$lib/apis/version";
   import { modFiles, store, targetDir } from "$lib/stores";
-    import type { ModFile } from "$lib/typing/typing";
-    import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+  import type { ModFile } from "$lib/typing/typing";
+  import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import {
     Sidebar,
     SidebarGroup,
@@ -13,7 +13,7 @@
     SidebarWrapper,
     Tooltip,
   } from "flowbite-svelte";
-    import { onDestroy, onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
 
   const spanClass = "";
   const aClass =
@@ -26,17 +26,13 @@
 
   $: if ($targetDir === "") goto("/");
 
-  // let unlisten: UnlistenFn;
   let unlisten1: UnlistenFn;
   let unlisten2: UnlistenFn;
   onMount(async () => {
+    $modFiles = [];
     console.log("    starting modFiles watch...");
-    // unlisten = await listen<Array<any>>("mod_files_updated", (event) => {
-    //   console.log("mod_files_updated");
-    //   $modFiles = event.payload;
-    // });
     unlisten1 = await listen<any>("mod_file_updated", (event) => {
-      console.log("mod_file_updated");
+      console.log("mod_file_updated: ", event.payload);
 
       for (let i = 0; i < $modFiles.length; i++) {
         if ($modFiles[i].sha1 == event.payload.sha1) {
@@ -49,6 +45,7 @@
       }
       let modFile: ModFile = event.payload;
       getVersionFromHash(modFile.sha1).then((res) => {
+        console.log("got version: ", res)
         modFile.remote_version = res;
         $modFiles.push(modFile);
         $modFiles = $modFiles;
@@ -60,6 +57,7 @@
         if ($modFiles[i].path == event.payload) {
           $modFiles.splice(i, 1);
           $modFiles = $modFiles;
+          console.log("modFiles_deleted: ", $modFiles)
           return;
         }
       }
@@ -68,7 +66,6 @@
   });
 
   onDestroy(() => {
-    // unlisten();
     unlisten1();
     unlisten2();
   });

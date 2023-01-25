@@ -1,43 +1,28 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api";
-  import {
-    Modal,
-    Button,
-    Tabs,
-    TabItem,
-    Fileupload,
-    Label,
-  } from "flowbite-svelte";
-  import PathInput from "./PathInput.svelte";
-  import { TargetType, type Target } from "../typing/typing";
-  import { createEventDispatcher } from "svelte";
-  import { onMount } from "svelte";
+  import { Modal } from "flowbite-svelte";
   import { getVersions } from "$lib/apis/version";
   import ModVersionCard from "./ModVersionCard.svelte";
-
-  const dispatch = createEventDispatcher();
+    import { onMount } from "svelte";
 
   export let show: boolean;
-  export let project: any;
+  export let versionIds: Array<string>;
   export let curModFile: any;
 
   let versions = new Array<any>();
 
-  $: {
-    console.log("project changed, updating versions");
-    getVersions(project.versions).then((res) => {
+  onMount(() => {
+    // console.log("-> onMount ModVersionModal");
+    // console.log("    getting versions: ", versionIds.length);
+    getVersions(versionIds).then((res) => {
       versions = res;
-      // console.log(res);
+      versions.sort((a, b) => a.date_published > b.date_published ? -1 : 1);
+      versions = versions;
     });
-  }
+  });
 </script>
 
 <Modal title="管理版本" bind:open={show} class="flex">
-  <!-- <div class="flex flex-col h-80 overflow-y-auto"> -->
-  <!-- {#if curModFile} -->
   {#each versions as version}
     <ModVersionCard {version} {curModFile} />
   {/each}
-  <!-- {/if} -->
-  <!-- </div> -->
 </Modal>

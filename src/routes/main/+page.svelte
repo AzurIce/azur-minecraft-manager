@@ -4,18 +4,15 @@
   import LocalModFileCard from "$lib/components/LocalModFileCard.svelte";
   import { modFiles, targetDir } from "$lib/stores";
   import { invoke } from "@tauri-apps/api";
-  import { Spinner, TabItem, Tabs } from "flowbite-svelte";
+  import { Button, Spinner, TabItem, Tabs } from "flowbite-svelte";
   import { onMount } from "svelte";
   import { getVersionFromHash } from "$lib/apis/version";
-  import { fade } from "svelte/transition";
   import { join } from "@tauri-apps/api/path";
+  import { updateProjects } from "$lib/apis/project";
 
   enum Tab {
     RemoteMod = "远端 Mod",
     LocalMod = "本地 Mod",
-    // Settings = "Settings",
-    // Users = "Users",
-    // Dashboard = "Dashboard",
   }
   let selectedTab = Tab.RemoteMod;
   $: tabs = Object.values(Tab);
@@ -36,10 +33,12 @@
   );
   $: localModFiles = $modFiles.filter(
     (modFile) => !remoteModFiles.includes(modFile)
-  );
+  ).sort((a, b) => a.filename < b.filename ? -1 : 1);
+  // $: console.log(remoteModFiles);
 
   let loading = true;
   onMount(async () => {
+    console.log("onMount -> /main");
     console.log("    updating mod files...");
 
     let _modFiles = await updateModFiles($targetDir);
@@ -55,25 +54,45 @@
     );
     loading = false;
   });
+
+  let updating = false;
 </script>
 
 <div class="flex flex-col flex-1 bg-white p-4 gap-2">
+  <Button
+    disabled={updating}
+    on:click={() => {
+      console.log("updating...");
+      updating = true;
+      updateProjects(remote_mods)
+        .then((res) => {
+          console.log("updated: ", res);
+          updating = false;
+          remote_mods = remote_mods;
+        })
+        .catch((err) => {
+          console.log(err);
+          updating = false;
+        });
+    }}
+    >{#if updating} <Spinner size={4} />{/if}更新 Modrinth 数据</Button
+  >
   <Tabs contentClass="">
     {#each tabs as tab, i}
-        <TabItem
-          open ={i==0}
-          title={tab}
-          on:click={() => {
-            selectedTab = tab;
-          }}
-        />
+      <TabItem
+        open={i == 0}
+        title={tab}
+        on:click={() => {
+          selectedTab = tab;
+        }}
+      />
     {/each}
   </Tabs>
 
   <!-- Tab Contents -->
   {#if selectedTab == Tab.RemoteMod}
     <div class="w-full overflow-y-auto flex flex-col gap-1">
-      <!-- {#if remoteModFiles.length}
+      <!-- {#if remote_mods.length > 0}
         <RemoteModCard project_id={remote_mods[0]} />
       {/if} -->
       {#each remote_mods as project_id}
@@ -118,7 +137,7 @@
               ]);
               console.log("added remote mod and copied file");
               remote_mods.push(project_id);
-              
+
               localModFiles = localModFiles.filter((modFile) => {
                 if (
                   modFile.remote_version != undefined &&

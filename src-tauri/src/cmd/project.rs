@@ -15,10 +15,20 @@ pub async fn get_project(id: String) -> Result<Project, String> {
     }
 }
 
-// #[tauri::command]
-// pub async fn update_project(id: String) -> Result<Project, String> {
-//     task::block_in_place(|| match CACHE.blocking_lock().update_project(&id) {
-//         Ok(project) => Ok(project),
-//         Err(err) => Err(format!("{}", err)),
-//     })
-// }
+#[tauri::command]
+pub async fn get_projects(ids: Vec<String>) -> Result<Vec<Project>, String> {
+    println!("get_projects({:#?})", ids);
+    let modrinth = Ferinth::default();
+    match modrinth
+        .get_multiple_projects(
+            ids.iter()
+                .map(|s| s.as_str())
+                .collect::<Vec<&str>>()
+                .as_slice(),
+        )
+        .await
+    {
+        Ok(projects) => Ok(projects),
+        Err(err) => Err(format!("{}", err)),
+    }
+}

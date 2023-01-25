@@ -29,6 +29,7 @@ fn main() {
             cmd::version::is_version_downloaded,
             cmd::version::download_version,
             cmd::project::get_project,
+            cmd::project::get_projects,
             cmd::mod_file::update_mod_files,
             cmd::mod_file::watch_mod_files,
         ])
