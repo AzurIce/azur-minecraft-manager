@@ -11,8 +11,6 @@
   let versions = new Array<any>();
 
   onMount(() => {
-    // console.log("-> onMount ModVersionModal");
-    // console.log("    getting versions: ", versionIds.length);
     getVersions(versionIds).then((res) => {
       versions = res;
       versions.sort((a, b) => a.date_published > b.date_published ? -1 : 1);
@@ -21,7 +19,7 @@
   });
 </script>
 
-<Modal title="管理版本" bind:open={show} class="flex">
+<Modal title="管理版本" bind:open={show} class="flex w-5/6">
   {#each versions as version}
     <ModVersionCard {version} {curModFile} />
   {/each}
