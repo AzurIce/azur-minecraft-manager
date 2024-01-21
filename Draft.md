@@ -7,7 +7,7 @@
 
 ## ModSource
 
-ModSource 为对应着远端 Mod 网站中的 Mod本身的信息。而非具体的某一个本地 Mod 文件。
+ModSource 为对应着远端 Mod 网站中的 Mod 本身的信息。而非具体的某一个本地 Mod 文件。
 
 ## ModFile 解析
 
