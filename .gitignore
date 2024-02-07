@@ -30,5 +30,4 @@ dist-ssr
 .env.*
 !.env.example
 
-# Mine
-*.lock
+.direnv
